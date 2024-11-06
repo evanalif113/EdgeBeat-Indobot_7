@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "edgebeat",
     "public": "public",
     "ignore": [
       "firebase.json",
