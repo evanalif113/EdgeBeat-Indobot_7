@@ -1,0 +1,108 @@
+#include <Wire.h>
+#include "MAX30105.h"
+#include "heartRate.h"
+
+MAX30105 particleSensor;
+
+const byte RATE_SIZE = 4;  // Increase this for more averaging. 4 is good.
+byte rates[RATE_SIZE];     // Array of heart rates
+byte rateSpot = 0;
+long lastBeat = 0;         // Time at which the last beat occurred
+
+float beatsPerMinute;
+float beatAvg;
+float smoothedBPM = 0.0;
+float alpha = 0.1;         // Smoothing factor between 0 and 1
+
+bool isStable = false;     // Flag to indicate if the BPM value is stable
+bool handDetected = false; // Flag to track hand detection status
+char myBPM[7];
+
+
+void setup()
+{
+    Serial.begin(115200);
+    
+    Wire.begin();
+
+    if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) // Use default I2C port, 400kHz speed
+    {
+      Serial.println("MAX30102 tidak ditemukan");
+      while (1);
+    }
+
+    particleSensor.setup(); // Configure sensor with default settings
+    particleSensor.setPulseAmplitudeRed(0x0A); // Turn Red LED to low to indicate sensor is running
+    particleSensor.setPulseAmplitudeGreen(0); // Turn off Green LED
+}
+
+void loop()
+{
+
+  long irValue = particleSensor.getIR();
+
+  // Check if there is a finger present
+  if (irValue > 50000)
+  {
+    if (!handDetected) // If hand was not previously detected, print message
+    {
+      Serial.println("Hand detected.");
+      lv_label_set_text(ui_Celsius, "+");
+      handDetected = true;
+    }
+
+    if (checkForBeat(irValue) == true)
+    {
+      // We sensed a beat!
+      long delta = millis() - lastBeat;
+      lastBeat = millis();
+
+      beatsPerMinute = 60 / (delta / 1000.0);
+
+      if (beatsPerMinute < 255 && beatsPerMinute > 20)
+      {
+        rates[rateSpot++] = (byte)beatsPerMinute; // Store this reading in the array
+        rateSpot %= RATE_SIZE; // Wrap variable
+
+        // Take average of readings
+        beatAvg = 0;
+        for (byte x = 0; x < RATE_SIZE; x++)
+          beatAvg += rates[x];
+        beatAvg /= RATE_SIZE;
+
+        // Apply exponential smoothing
+        smoothedBPM = (alpha * beatsPerMinute) + ((1 - alpha) * smoothedBPM);
+
+        // Set the stability flag when the smoothed BPM value converges
+        if (abs(smoothedBPM - beatAvg) < 1.5) // Adjust the threshold as needed
+        {
+          isStable = true;
+        }
+      }
+    }
+
+    // Only print values if the signal is stable
+    if (isStable)
+    {
+      Serial.print("IR=");
+      Serial.print(irValue);
+      Serial.print(", BPM=");
+      Serial.print(beatsPerMinute);
+      Serial.print(", Avg BPM=");
+      Serial.print(beatAvg);
+      Serial.print(", Smoothed BPM=");
+      Serial.println(smoothedBPM);
+    }
+  }
+  else
+  {
+    if (handDetected) // If hand was previously detected but now not detected
+    {
+      Serial.println("Hand not detected.");
+      handDetected = false;
+    }
+
+    // Reset stability flag if no finger is detected
+    isStable = false;
+  }
+}
