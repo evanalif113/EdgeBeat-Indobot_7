@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edgebeat</title>
+    <title>Rekam Data - Edgebeat</title>
     <!-- Favicon -->
     <link rel="icon" href="./img/logo.jpg" type="image/x-icon">
     <!-- Bootstrap CSS -->
@@ -29,7 +29,7 @@
                         <a class="nav-link" href="#features">Fitur</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="#cta">Daftar</a>
+                        <a class="nav-link active" href="#rekamData">Rekam Data</a>
                     </li>
                 </ul>
             </div>
@@ -39,34 +39,27 @@
     <!-- Header -->
     <header class="bg-primary text-white text-center py-5">
         <div class="container">
-            <h1 class="display-4">Selamat Datang di Edgebeat</h1>
-            <p class="lead">Aplikasi Pemantauan Kesehatan Berbasis Sensor Digital</p>
+            <h1 class="display-4">Rekam Data Kesehatan</h1>
+            <p class="lead">Masukkan data kesehatan harian Anda untuk dipantau oleh Edgebeat</p>
         </div>
     </header>
 
-    <!-- Form Section -->
-    <section id="form-section" class="py-5">
+    <!-- Form Rekam Data -->
+    <section id="rekamData" class="py-5">
         <div class="container">
-            <h2 class="text-center mb-4">Pencatatan Data</h2>
-            <form id="formPendaftaran">
+            <h2 class="text-center mb-4">Form Rekam Data</h2>
+            <form id="rekamDataForm">
                 <div class="mb-3">
-                    <label for="nama" class="form-label">Nama</label>
-                    <input type="text" class="form-control" id="nama" placeholder="Masukkan Nama Anda" required>
+                    <label for="suhu" class="form-label">Suhu Tubuh (°C)</label>
+                    <input type="number" step="0.1" class="form-control" id="suhu" placeholder="Masukkan Suhu Tubuh" required>
                 </div>
                 <div class="mb-3">
-                    <label for="umur" class="form-label">Umur</label>
-                    <input type="text" class="form-control" id="umur" placeholder="Masukkan Umur Anda" required>
+                    <label for="detakJantung" class="form-label">Detak Jantung (BPM)</label>
+                    <input type="number" class="form-control" id="detakJantung" placeholder="Masukkan Detak Jantung" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Jenis Kelamin</label><br>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="genderMale" value="Laki-laki" required>
-                        <label class="form-check-label" for="genderMale">Laki-laki</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="Perempuan" required>
-                        <label class="form-check-label" for="genderFemale">Perempuan</label>
-                    </div>
+                    <label for="tekananDarah" class="form-label">Tekanan Darah (mmHg)</label>
+                    <input type="text" class="form-control" id="tekananDarah" placeholder="Contoh: 120/80" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Kirim</button>
             </form>
@@ -78,14 +71,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="successModalLabel">Data Berhasil Tersimpan</h5>
+                    <h5 class="modal-title" id="successModalLabel">Data Berhasil Direkam</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Terima kasih! Data Anda telah tersimpan.
+                    Data kesehatan Anda telah berhasil direkam. Terima kasih!
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="window.location.href='./perekeman.html'">Lanjut</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="window.location.href='dashboard.html'">Lanjut ke Dashboard</button>
                 </div>
             </div>
         </div>
@@ -100,7 +93,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Maaf, terjadi kesalahan saat mengirim data Anda. Silakan coba lagi nanti.
+                    Maaf, terjadi kesalahan saat merekam data. Silakan coba lagi nanti.
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -115,7 +108,7 @@
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
-        // Firebase configuration
+        // Firebase configuration (gunakan konfigurasi dari halaman sebelumnya)
         const firebaseConfig = {
             apiKey: "AIzaSyA-GgbbQkIOWRJ2nYgGkYTq8EaN4h1R2HQ",
             authDomain: "edgebeat-indobot7.firebaseapp.com",
@@ -133,24 +126,25 @@
         const database = getDatabase(app);
 
         // Form submission
-        document.getElementById('formPendaftaran').addEventListener('submit', function(e) {
+        document.getElementById('rekamDataForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             // Get form values
-            const nama = document.getElementById('nama').value;
-            const umur = document.getElementById('umur').value;
-            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const suhu = document.getElementById('suhu').value;
+            const detakJantung = document.getElementById('detakJantung').value;
+            const tekananDarah = document.getElementById('tekananDarah').value;
 
             // Send data to Firebase Realtime Database
-            push(ref(database, 'pendaftaran'), {
-                nama: nama,
-                umur: umur,
-                gender: gender
+            push(ref(database, 'rekamData'), {
+                suhu: suhu,
+                detakJantung: detakJantung,
+                tekananDarah: tekananDarah,
+                timestamp: new Date().toISOString()
             })
             .then(() => {
                 // Show success modal
                 new bootstrap.Modal(document.getElementById('successModal')).show();
-                document.getElementById('formPendaftaran').reset(); // Reset form
+                document.getElementById('rekamDataForm').reset(); // Reset form
             })
             .catch(error => {
                 console.error('Error:', error);
