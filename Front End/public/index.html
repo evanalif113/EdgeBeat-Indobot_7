@@ -23,19 +23,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#about">Tentang Kami</a>
+                        <a class="nav-link" href="#about">Tentang Kami</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#features">Fitur</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#cta">Daftar</a>
+                        <a class="nav-link active" href="#cta">Daftar</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-</body>
 
     <!-- Header -->
     <header class="bg-primary text-white text-center py-5">
@@ -46,55 +45,70 @@
         </div>
     </header>
 
-    <!-- Section: About -->
-    <section id="about" class="py-5">
-        <div class="container text-center">
-            <h2 class="mb-4">Tentang Kami</h2>
-            <p class="text-muted">Edgebeat adalah aplikasi pemantauan kesehatan yang memungkinkan Anda untuk memantau indikator kesehatan seperti detak jantung, kadar oksigen, dan lainnya secara real-time.</p>
-        </div>
-    </section>
-
-<!-- Section: Features -->
-<section id="features" class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">Fitur Utama</h2>
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Monitoring Detak Jantung</h5>
-                        <p class="card-text">Pantau detak jantung Anda secara real-time dan dapatkan notifikasi ketika nilai berada di luar batas normal.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Kadar Oksigen</h5>
-                        <p class="card-text">Awasi kadar oksigen dalam darah Anda untuk menjaga kesehatan yang optimal.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Riwayat Data</h5>
-                        <p class="card-text">Simpan riwayat pengukuran kesehatan Anda untuk memudahkan analisis tren kesehatan Anda.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-    <!-- Section: Call to Action -->
-    <section id="cta" class="py-5 text-white text-center" style="background-color: #0d6efd;">
+    <!-- Form Section -->
+    <section id="form-section" class="py-5">
         <div class="container">
-            <h2 class="mb-4">Mulai Pantau Kesehatan Anda Sekarang</h2>
-            <a href="register.html" class="btn btn-light btn-lg">Daftar Sekarang</a>
+            <h2 class="text-center mb-4">Formulir Pendaftaran</h2>
+            <form id="formPendaftaran">
+                <div class="mb-3">
+                    <label for="nama" class="form-label">Nama</label>
+                    <input type="text" class="form-control" id="nama" placeholder="Masukkan Nama Anda" required>
+                </div>
+                <div class="mb-3">
+                    <label for="nik" class="form-label">Umur</label>
+                    <input type="text" class="form-control" id="umur" placeholder="Masukkan Umur Anda" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Kirim</button>
+            </form>
         </div>
     </section>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-GgbbQkIOWRJ2nYgGkYTq8EaN4h1R2HQ",
+            authDomain: "edgebeat-indobot7.firebaseapp.com",
+            databaseURL: "https://edgebeat-indobot7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "edgebeat-indobot7",
+            storageBucket: "edgebeat-indobot7.appspot.com",
+            messagingSenderId: "407937371870",
+            appId: "1:407937371870:web:4ed6c579d62b283a587c4f",
+            measurementId: "G-Y4MZVWEJ2K"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Form submission
+        document.getElementById('formPendaftaran').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const nama = document.getElementById('nama').value;
+            const umur = document.getElementById('umur').value;
+
+            // Send data to Firebase Realtime Database
+            push(ref(database, 'pendaftaran'), {
+                nama: nama,
+                umur: umur
+            })
+            .then(() => {
+                alert('Data berhasil dikirim!');
+                document.getElementById('formPendaftaran').reset(); // Reset form
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Gagal mengirim data!');
+            });
+        });
+    </script>
 
     <!-- Footer -->
     <footer class="bg-light py-4">
