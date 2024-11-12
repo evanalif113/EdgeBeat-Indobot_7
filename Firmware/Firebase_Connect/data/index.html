@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Data Chart with Plotly</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h2>ESP32 Random Data Chart</h2>
+    <div id="chart" style="width: 100%; height: 400px;"></div>
+
+    <script>
+        // Inisialisasi data kosong
+        let timeData = [];
+        let valueData = [];
+
+        function updateChart(newTime, newValue) {
+            timeData.push(newTime);
+            valueData.push(newValue);
+
+            const trace = {
+                x: timeData,
+                y: valueData,
+                mode: 'lines+markers',
+                type: 'scatter',
+                line: { color: '' }
+            };
+
+            const layout = {
+                title: 'Random Data over Time',
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Value' }
+            };
+
+            Plotly.newPlot('chart', [trace], layout);
+        }
+
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    const time = timeData.length; // Waktu sebagai indeks data
+                    updateChart(time, data.value);
+                });
+        }
+
+        // Ambil data baru setiap detik
+        setInterval(fetchData, 1000);
+    </script>
+</body>
+</html>
