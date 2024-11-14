@@ -2,6 +2,8 @@
 #include <WebServer.h>
 #include <LittleFS.h>
 #include <ArduinoJson.h>
+#include <Update.h>
+
 
 const char* ssid = "server";
 const char* password = "jeris6467";
@@ -33,7 +35,9 @@ void setup() {
     // Rute untuk mendapatkan data acak
     server.on("/data", HTTP_GET, []() {
         JsonDocument doc;
-        doc["value"] = random(0, 100); // Data acak antara 0 dan 100
+        doc["value1"] = random(0, 100); // Data acak pertama antara 0 dan 100
+        doc["value2"] = random(0, 100); // Data acak kedua antara 0 dan 100
+        doc["value3"] = random(0, 100); // Data acak ketiga antara 0 dan 100
         String response;
         serializeJson(doc, response);
         server.send(200, "application/json", response);
