@@ -111,6 +111,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getDatabase, ref, child, push, set , get} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        import { getFirestore, doc, setDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
         // Firebase configuration
@@ -129,40 +130,49 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        const firestore = getFirestore(app);
 
-        // Form submission
-        document.getElementById('formPendaftaran').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        document.getElementById('formPendaftaran').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-            const nama = document.getElementById('nama').value;
-            const umur = document.getElementById('umur').value;
-            const gender = document.querySelector('input[name="gender"]:checked').value;
+    const nama = document.getElementById('nama').value;
+    const umur = document.getElementById('umur').value;
+    const gender = document.querySelector('input[name="gender"]:checked').value;
 
     try {
-        // Reference to 'pendaftaran'
-        const pendaftaranRef = ref(database, 'pendaftaran');
+        // Referensi ke koleksi 'pendaftaran'
+        const pendaftaranCollection = collection(firestore, 'pendaftaran');
 
-        // Get the last key (numeric ID)
-        const snapshot = await get(pendaftaranRef);
+        // Ambil ID terakhir dari dokumen yang ada
+        const q = query(pendaftaranCollection, orderBy("id", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
 
-        let newID = 1; // Default ID if no data exists
-        if (snapshot.exists()) {
-            const keys = Object.keys(snapshot.val()).map(Number); // Convert keys to numbers
-            newID = Math.max(...keys) + 1; // Get the next numeric ID
+        let newID = 1; // Default ID jika tidak ada data
+        if (!querySnapshot.empty) {
+            const lastDoc = querySnapshot.docs[0];
+            newID = lastDoc.data().id + 1; // Tambahkan 1 ke ID terakhir
         }
 
-        // Set new data with the newID
-        const newData = { nama, umur, gender };
-        await set(ref(database, `pendaftaran/${newID}`), newData);
+        // Data baru yang akan disimpan
+        const newData = {
+            id: newID, // Menyimpan ID sebagai field di dokumen
+            nama,
+            umur,
+            gender
+        };
 
-        // Show success modal
+        // Simpan data dengan ID numerik
+        await setDoc(doc(pendaftaranCollection, newID.toString()), newData);
+
+        // Tampilkan modal sukses
         new bootstrap.Modal(document.getElementById('successModal')).show();
         document.getElementById('formPendaftaran').reset();
-        }   catch (error) {
+    } catch (error) {
         console.error('Error:', error);
-        // Show error modal
+
+        // Tampilkan modal error
         new bootstrap.Modal(document.getElementById('errorModal')).show();
-        }
+    }
     });
 
         // Plotly Chart Code
