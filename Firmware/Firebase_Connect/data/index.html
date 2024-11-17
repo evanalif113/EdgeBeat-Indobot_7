@@ -133,13 +133,13 @@
         const firestore = getFirestore(app);
 
         document.getElementById('formPendaftaran').addEventListener('submit', async function (e) {
-    e.preventDefault();
+            e.preventDefault();
 
-    const nama = document.getElementById('nama').value;
-    const umur = document.getElementById('umur').value;
-    const gender = document.querySelector('input[name="gender"]:checked').value;
+            const nama = document.getElementById('nama').value;
+            const umur = document.getElementById('umur').value;
+            const gender = document.querySelector('input[name="gender"]:checked').value;
 
-    try {
+        try {
         // Referensi ke koleksi 'pendaftaran'
         const pendaftaranCollection = collection(firestore, 'pendaftaran');
 
@@ -167,12 +167,12 @@
         // Tampilkan modal sukses
         new bootstrap.Modal(document.getElementById('successModal')).show();
         document.getElementById('formPendaftaran').reset();
-    } catch (error) {
+        }   catch (error) {
         console.error('Error:', error);
 
         // Tampilkan modal error
         new bootstrap.Modal(document.getElementById('errorModal')).show();
-    }
+        }
     });
 
         // Plotly Chart Code
