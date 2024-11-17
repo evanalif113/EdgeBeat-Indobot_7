@@ -167,9 +167,10 @@
         // Tampilkan modal sukses
         new bootstrap.Modal(document.getElementById('successModal')).show();
         document.getElementById('formPendaftaran').reset();
-        }   catch (error) {
-        console.error('Error:', error);
+        }   
 
+        catch (error) {
+        console.error('Error:', error);
         // Tampilkan modal error
         new bootstrap.Modal(document.getElementById('errorModal')).show();
         }
