@@ -34,7 +34,34 @@
             <p class="lead">Aplikasi Pemantauan Kesehatan Berbasis Sensor Digital</p>
         </div>
     </header>
-
+        <!-- Form Section -->
+        <section id="form-section" class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-4">Pencatatan Data</h2>
+                <form id="formPendaftaran">
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="nama" placeholder="Masukkan Nama Anda" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="umur" class="form-label">Umur</label>
+                        <input type="text" class="form-control" id="umur" placeholder="Masukkan Umur Anda" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jenis Kelamin</label><br>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="gender" id="genderMale" value="Laki-laki" required>
+                            <label class="form-check-label" for="genderMale">Laki-laki</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="Perempuan" required>
+                            <label class="form-check-label" for="genderFemale">Perempuan</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Kirim</button>
+                </form>
+            </div>
+        </section>
     <!-- Chart Section -->
     <section id="chart-section" class="py-5">
         <div class="container">
@@ -44,35 +71,38 @@
             <div id="chart3" style="width: 100%; height: 400px;"></div>
         </div>
     </section>
-
-    <!-- Form Section -->
-    <section id="form-section" class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-4">Pencatatan Data</h2>
-            <form id="formPendaftaran">
-                <div class="mb-3">
-                    <label for="nama" class="form-label">Nama</label>
-                    <input type="text" class="form-control" id="nama" placeholder="Masukkan Nama Anda" required>
-                </div>
-                <div class="mb-3">
-                    <label for="umur" class="form-label">Umur</label>
-                    <input type="text" class="form-control" id="umur" placeholder="Masukkan Umur Anda" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Jenis Kelamin</label><br>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="genderMale" value="Laki-laki" required>
-                        <label class="form-check-label" for="genderMale">Laki-laki</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="Perempuan" required>
-                        <label class="form-check-label" for="genderFemale">Perempuan</label>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Kirim</button>
-            </form>
+    <!-- Modal Sukses -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Berhasil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Data berhasil dikirim!
+            </div>
         </div>
-    </section>
+    </div>
+</div>
+
+<!-- Modal Error -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Terjadi kesalahan saat mengirim data. Silakan coba lagi.
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
     <!-- Modal Notifikasi Sukses -->
     <!-- ... existing modal code ... -->
@@ -80,7 +110,7 @@
     <!-- Firebase Configuration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        import { getDatabase, ref, child, push, set , get} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
         // Firebase configuration
@@ -101,27 +131,39 @@
         const database = getDatabase(app);
 
         // Form submission
-        document.getElementById('formPendaftaran').addEventListener('submit', function(e) {
+        document.getElementById('formPendaftaran').addEventListener('submit', async function(e) {
             e.preventDefault();
+
             const nama = document.getElementById('nama').value;
             const umur = document.getElementById('umur').value;
             const gender = document.querySelector('input[name="gender"]:checked').value;
 
-            // Generate numeric ID using timestamp
-            const numericID = Date.now();
+    try {
+        // Reference to 'pendaftaran'
+        const pendaftaranRef = ref(database, 'pendaftaran');
 
-            // Set data to Firebase under numeric ID
-            const newData = { nama, umur, gender };
-            set(ref(database, `pendaftaran/${numericID}`), newData)
-            .then(() => {
-                new bootstrap.Modal(document.getElementById('successModal')).show();
-                document.getElementById('formPendaftaran').reset();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                new bootstrap.Modal(document.getElementById('errorModal')).show();
-            });
-        });
+        // Get the last key (numeric ID)
+        const snapshot = await get(pendaftaranRef);
+
+        let newID = 1; // Default ID if no data exists
+        if (snapshot.exists()) {
+            const keys = Object.keys(snapshot.val()).map(Number); // Convert keys to numbers
+            newID = Math.max(...keys) + 1; // Get the next numeric ID
+        }
+
+        // Set new data with the newID
+        const newData = { nama, umur, gender };
+        await set(ref(database, `pendaftaran/${newID}`), newData);
+
+        // Show success modal
+        new bootstrap.Modal(document.getElementById('successModal')).show();
+        document.getElementById('formPendaftaran').reset();
+        }   catch (error) {
+        console.error('Error:', error);
+        // Show error modal
+        new bootstrap.Modal(document.getElementById('errorModal')).show();
+        }
+    });
 
         // Plotly Chart Code
         // Inisialisasi data kosong
