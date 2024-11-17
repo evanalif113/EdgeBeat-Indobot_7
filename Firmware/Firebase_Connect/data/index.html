@@ -166,7 +166,7 @@
     });
 
         // Plotly Chart Code
-        // Inisialisasi data kosong
+        // Inisialisasi array data
         let timeData = [];
         let valueData1 = [];
         let valueData2 = [];
@@ -204,19 +204,19 @@
 
             const layout1 = {
                 title: 'Random Data 1 over Time',
-                xaxis: { title: 'Time (s)' },
+                xaxis: { title: 'Waktu' },
                 yaxis: { title: 'Value 1' }
             };
 
             const layout2 = {
                 title: 'Random Data 2 over Time',
-                xaxis: { title: 'Time (s)' },
+                xaxis: { title: 'Waktu' },
                 yaxis: { title: 'Value 2' }
             };
 
             const layout3 = {
                 title: 'Random Data 3 over Time',
-                xaxis: { title: 'Time (s)' },
+                xaxis: { title: 'Waktu' },
                 yaxis: { title: 'Value 3' }
             };
 
@@ -230,7 +230,10 @@
                 .then(response => response.json())
                 .then(data => {
                     const time = timeData.length; // Waktu sebagai indeks data
-                    updateChart(time, data.value1, data.value2, data.value3);
+                    updateChart(time, 
+                    data.value1, 
+                    data.value2, 
+                    data.value3);
                 });
         }
 
