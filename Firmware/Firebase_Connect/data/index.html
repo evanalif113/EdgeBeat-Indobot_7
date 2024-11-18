@@ -65,7 +65,7 @@
     <!-- Chart Section -->
     <section id="chart-section" class="py-5">
         <div class="container">
-            <h2 class="text-center mb-4">Data Sensor</h2>
+            <h2 class="text-center mb-4">Data Sensor MAX30102</h2>
             <div id="chart1" style="width: 100%; height: 400px;"></div>
             <div id="chart2" style="width: 100%; height: 400px;"></div>
             <div id="chart3" style="width: 100%; height: 400px;"></div>
@@ -211,21 +211,21 @@
             };
 
             const layout1 = {
-                title: 'Random Data 1 over Time',
+                title: 'Denyut Nadi',
                 xaxis: { title: 'Waktu' },
-                yaxis: { title: 'Value 1' }
+                yaxis: { title: 'Beat' }
             };
 
             const layout2 = {
-                title: 'Random Data 2 over Time',
+                title: 'Sp O2',
                 xaxis: { title: 'Waktu' },
-                yaxis: { title: 'Value 2' }
+                yaxis: { title: 'Saturasi' }
             };
 
             const layout3 = {
-                title: 'Random Data 3 over Time',
+                title: 'Suhu Tubuh',
                 xaxis: { title: 'Waktu' },
-                yaxis: { title: 'Value 3' }
+                yaxis: { title: 'Celcius' }
             };
 
             Plotly.newPlot('chart1', [trace1], layout1);
