@@ -1,50 +1,57 @@
+#include <WiFi.h>
 #include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
-#include "SSD1306.h" // For the OLED
+#include "FS.h"
 
+#define SCREEN_WIDTH 128 // Lebar OLED
+#define SCREEN_HEIGHT 64 // Tinggi OLED
+#define OLED_RESET    -1 // Reset pin (gunakan -1 jika tidak ada)
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 MAX30105 particleSensor;
-SSD1306 display(0x3c, 2, 3); // Initialize the OLED display (I2C address, SDA, SCL)
 
-#define MAX_BRIGHTNESS 255
+uint32_t irBuffer[100];   // Data sensor LED inframerah
+uint32_t redBuffer[100];  // Data sensor LED merah
 
-uint32_t irBuffer[100];   // infrared LED sensor data
-uint32_t redBuffer[100];  // red LED sensor data
-
-int32_t bufferLength;     // data length
-int32_t spo2;             // SPO2 value
-int8_t validSPO2;         // indicator to show if the SPO2 calculation is valid
-int32_t heartRate;        // heart rate value
-int8_t validHeartRate;    // indicator to show if the heart rate calculation is valid
+int32_t bufferLength;     // Panjang data
+int32_t spo2;             // Nilai SPO2
+int8_t validSPO2;         // Validitas perhitungan SPO2
+int32_t heartRate;        // Nilai detak jantung
+int8_t validHeartRate;    // Validitas perhitungan detak jantung
 
 void setup() {
-  Wire.begin(2,3);
-  Serial.begin(115200);
-  
-  // Initialize the OLED
-  display.init();
- 
-  display.setFont(ArialMT_Plain_10);
-  
-  // Initialize the MAX30105 sensor
+  Wire.begin(2, 3); // Inisialisasi I2C dengan SDA di pin 2, SCL di pin 3
+  Serial.begin(115200); 
+
+  // Inisialisasi OLED
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Alamat I2C OLED adalah 0x3C
+    Serial.println(F("OLED tidak ditemukan"));
+    while (1);
+  }
+  display.clearDisplay(); //Memastikan OLED display clear
+  display.display();
+
+  // Inisialisasi sensor MAX30105
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
     Serial.println(F("MAX30102 tidak ditemukan"));
     while (1);
   }
-  
-  // Sensor configuration
+
+  // Konfigurasi sensor
   particleSensor.setup(60, 4, 2, 100, 411, 4096);
-   display.flipScreenVertically(); // Rotate the display 180 degrees
 }
 
 void loop() {
-  // Read temperature
+  // Membaca suhu
   float temperature = particleSensor.readTemperature();
   float Calibrate = temperature - 9;
 
-  // Collect heart rate and SpO2 data
+  // Mengumpulkan data detak jantung dan SpO2
   bufferLength = 100;
-  for (byte i = 0 ; i < bufferLength ; i++) {
+  for (byte i = 0; i < bufferLength; i++) {
     while (particleSensor.available() == false) {
       particleSensor.check();
     }
@@ -53,19 +60,24 @@ void loop() {
     particleSensor.nextSample();
   }
 
-  // Calculate heart rate and SpO2
+  // Menghitung detak jantung dan SpO2
   maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
 
-  // Display data on OLED
-  display.clear();
-  display.setTextAlignment(TEXT_ALIGN_LEFT);
-  display.setFont(ArialMT_Plain_10);
+  // Menampilkan data ke OLED
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
   
-  display.drawString(0, 0, "Heart Rate: " + String(heartRate) + " bpm");
-  display.drawString(0, 15, "SpO2: " + String(spo2) + "%");
-  display.drawString(0, 30, "Temp: " + String(Calibrate, 1) + " C");
-  
+  display.setCursor(0, 0);
+  display.println("Heart Rate: " + String(heartRate) + " bpm");
+
+  display.setCursor(0, 10);
+  display.println("SpO2: " + String(spo2) + "%");
+
+  display.setCursor(0, 20);
+  display.println("Temp: " + String(Calibrate, 1) + " C");
+
   display.display();
-  
-  delay(1000); // Update every second
+
+  delay(1000); // Update setiap detik
 }
