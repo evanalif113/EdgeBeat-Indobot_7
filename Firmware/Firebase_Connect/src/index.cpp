@@ -1,6 +1,11 @@
 #include <WiFi.h>
+#include <Wire.h>
 #include <WebServer.h>
 #include <LittleFS.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include "MAX30105.h"
+#include "spo2_algorithm.h"
 #include <ArduinoJson.h>
 #include <Update.h>
 
