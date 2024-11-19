@@ -13,7 +13,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" id="NavHome">
                 <img src="./img/logo.jpg" alt="Edgebeat Logo" style="height: 40px;">
                 Edgebeat
             </a>
@@ -23,13 +23,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#about">Tentang Kami</a>
+                        <a class="nav-link" id="NavData">Data</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#features">Fitur</a>
+                        <a class="nav-link" href="Nav">Fitur</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="#cta">Daftar</a>
+                        <a class="nav-link active" href="#cta">Admin</a>
                     </li>
                 </ul>
             </div>
@@ -79,7 +79,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title">Berhasil</h5>
-                    <button type="button" class="btn-close" id="btnClose" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" id="NavPerekaman" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     Data berhasil dikirim!
@@ -171,11 +171,6 @@
         new bootstrap.Modal(document.getElementById('errorModal')).show();
         }
     });
-
-    //Arahkan ke perekeman.html
-    document.getElementById('btnClose').addEventListener('click', function() {
-        window.location.href = './perekaman.html'; // Ganti dengan link halaman yang diinginkan
-    });
     </script>
 
     <!-- Footer -->
@@ -187,5 +182,6 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./script/navigation.js"> </script>
 </body>
 </html>
