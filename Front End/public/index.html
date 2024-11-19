@@ -73,37 +73,31 @@
         </div>
     </section>
 
-    <!-- Modal Notifikasi Sukses -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <!-- Modal Sukses -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="successModalLabel">Data Berhasil Tersimpan</h5>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Berhasil</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Terima kasih! Data Anda telah tersimpan.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="window.location.href='./perekeman.html'">Lanjut</button>
+                    Data berhasil dikirim!
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Modal Notifikasi Gagal -->
-    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    
+    <!-- Modal Error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="errorModalLabel">Pengiriman Gagal</h5>
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Error</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Maaf, terjadi kesalahan saat mengirim data Anda. Silakan coba lagi nanti.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    Terjadi kesalahan saat mengirim data. Silakan coba lagi.
                 </div>
             </div>
         </div>
@@ -112,7 +106,8 @@
     <!-- Firebase Configuration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        import { getDatabase, ref, child, push, set , get} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        import { getFirestore, doc, setDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
         // Firebase configuration
@@ -121,7 +116,7 @@
             authDomain: "edgebeat-indobot7.firebaseapp.com",
             databaseURL: "https://edgebeat-indobot7-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "edgebeat-indobot7",
-            storageBucket: "edgebeat-indobot7.appspot.com",
+            storageBucket: "edgebeat-indobot7.firebasestorage.app",
             messagingSenderId: "407937371870",
             appId: "1:407937371870:web:4ed6c579d62b283a587c4f",
             measurementId: "G-Y4MZVWEJ2K"
@@ -131,33 +126,51 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        const firestore = getFirestore(app);
 
-        // Form submission
-        document.getElementById('formPendaftaran').addEventListener('submit', function(e) {
+        document.getElementById('formPendaftaran').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // Get form values
             const nama = document.getElementById('nama').value;
             const umur = document.getElementById('umur').value;
             const gender = document.querySelector('input[name="gender"]:checked').value;
 
-            // Send data to Firebase Realtime Database
-            push(ref(database, 'pendaftaran'), {
-                nama: nama,
-                umur: umur,
-                gender: gender
-            })
-            .then(() => {
-                // Show success modal
-                new bootstrap.Modal(document.getElementById('successModal')).show();
-                document.getElementById('formPendaftaran').reset(); // Reset form
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Show error modal
-                new bootstrap.Modal(document.getElementById('errorModal')).show();
-            });
-        });
+        try {
+        // Referensi ke koleksi 'pendaftaran'
+        const pendaftaranCollection = collection(firestore, 'pendaftaran');
+
+        // Ambil ID terakhir dari dokumen yang ada
+        const q = query(pendaftaranCollection, orderBy("id", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        let newID = 1; // Default ID jika tidak ada data
+        if (!querySnapshot.empty) {
+            const lastDoc = querySnapshot.docs[0];
+            newID = lastDoc.data().id + 1; // Tambahkan 1 ke ID terakhir
+        }
+
+        // Data baru yang akan disimpan
+        const newData = {
+            id: newID, // Menyimpan ID sebagai field di dokumen
+            nama,
+            umur,
+            gender
+        };
+
+        // Simpan data dengan ID numerik
+        await setDoc(doc(pendaftaranCollection, newID.toString()), newData);
+
+        // Tampilkan modal sukses
+        new bootstrap.Modal(document.getElementById('successModal')).show();
+        document.getElementById('formPendaftaran').reset();
+        }   
+
+        catch (error) {
+        console.error('Error:', error);
+        // Tampilkan modal error
+        new bootstrap.Modal(document.getElementById('errorModal')).show();
+        }
+    });
     </script>
 
     <!-- Footer -->
