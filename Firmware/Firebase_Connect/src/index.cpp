@@ -4,7 +4,6 @@
 #include <Adafruit_SSD1306.h>
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
-#include "FS.h"
 
 #define SCREEN_WIDTH 128 // Lebar OLED
 #define SCREEN_HEIGHT 64 // Tinggi OLED
