@@ -75,6 +75,13 @@
         </div>
     </div>
 
+    <div class="container text-center my-4">
+        <button id="start-recording" class="btn btn-success me-2">Mulai Rekam</button>
+        <button id="stop-recording" class="btn btn-danger">Berhenti Rekam</button>
+    </div>
+
+    
+
     <!-- Modal Sukses -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -264,6 +271,28 @@
 
             Plotly.newPlot('suhu-chart', [trace], layout);
         }
+
+        // Function to start recording
+    document.getElementById('start-recording').addEventListener('click', () => {
+        set(ref(database, 'recording/status'), 1)
+            .then(() => {
+                console.log('Recording started');
+            })
+            .catch((error) => {
+                console.error('Error starting recording:', error);
+            });
+    });
+
+    // Function to stop recording
+    document.getElementById('stop-recording').addEventListener('click', () => {
+        set(ref(database, 'recording/status'), 0)
+            .then(() => {
+                console.log('Recording stopped');
+            })
+            .catch((error) => {
+                console.error('Error stopping recording:', error);
+            });
+    });
 
         // Call the function to display the data when the page loads
         window.onload = displayLastRegistration;
