@@ -17,7 +17,7 @@ WebServer server(80);
 BH1750 lightMeter;
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
-float value1, value2, value3;
+float denyutnadi, spo, suhu;
 
 void setup() {
     Serial.begin(115200);
@@ -60,14 +60,14 @@ void setup() {
 
     // Rute untuk mendapatkan data acak
     server.on("/data", HTTP_GET, []() {
-        value1 = lightMeter.readLightLevel(); // Baca data dari sensor BH1750
-        value2 = random(0, 100); // Data acak kedua antara 0 dan 100
-        value3 = random(0, 100); // Data acak ketiga antara 0 dan 100
+        denyutnadi = lightMeter.readLightLevel(); // Baca data dari sensor BH1750
+        spo = random(0, 100); // Data acak kedua antara 0 dan 100
+        suhu = random(0, 100); // Data acak ketiga antara 0 dan 100
 
         JsonDocument doc;
-        doc["value1"] = value1;
-        doc["value2"] = value2;
-        doc["value3"] = value3;
+        doc["value1"] = denyutnadi;
+        doc["value2"] = spo;
+        doc["value3"] = suhu;
         String response;
         serializeJson(doc, response);
         server.send(200, "application/json", response);
@@ -79,17 +79,16 @@ void setup() {
 
 void loop() {
     server.handleClient();
-
     // Tampilkan data di OLED SSD1306
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
-    display.print("Value1: ");
-    display.println(value1);
-    display.print("Value2: ");
-    display.println(value2);
-    display.print("Value3: ");
-    display.println(value3);
+    display.print("Denyut Nadi: ");
+    display.println(denyutnadi);
+    display.print("Saturasi O2: ");
+    display.println(spo);
+    display.print("Suhu Tubuh: ");
+    display.println(suhu);
     display.display();
 }
