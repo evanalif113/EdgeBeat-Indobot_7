@@ -112,6 +112,19 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="recording-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Status Rekaman</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <!-- Pesan toast akan ditampilkan di sini -->
+                </div>
+            </div>
+        </div>
+
     <!-- Firebase Configuration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -272,25 +285,38 @@
             Plotly.newPlot('suhu-chart', [trace], layout);
         }
 
-        // Function to start recording
+    // Function to show toast
+    function showToast(message) {
+        const toastElement = document.getElementById('recording-toast');
+        const toastBody = toastElement.querySelector('.toast-body');
+        toastBody.textContent = message;
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+
+    // Function to start recording
     document.getElementById('start-recording').addEventListener('click', () => {
-        set(ref(database, 'recording/status'), 1)
+        set(ref(database, 'statusrekam'), 1)
             .then(() => {
                 console.log('Recording started');
+                showToast('Rekaman dimulai');
             })
             .catch((error) => {
                 console.error('Error starting recording:', error);
+                showToast('Gagal memulai rekaman');
             });
     });
 
     // Function to stop recording
     document.getElementById('stop-recording').addEventListener('click', () => {
-        set(ref(database, 'recording/status'), 0)
+        set(ref(database, 'statusrekam'), 0)
             .then(() => {
                 console.log('Recording stopped');
+                showToast('Rekaman dihentikan');
             })
             .catch((error) => {
                 console.error('Error stopping recording:', error);
+                showToast('Gagal menghentikan rekaman');
             });
     });
 
