@@ -77,8 +77,7 @@ void setup() {
     Serial.println("HTTP server started");
 }
 
-void loop() {
-    server.handleClient();
+void updateDisplay() {
     // Tampilkan data di OLED SSD1306
     display.clearDisplay();
     display.setTextSize(1);
@@ -91,4 +90,13 @@ void loop() {
     display.print("Suhu Tubuh: ");
     display.println(suhu);
     display.display();
+}
+
+void loop() {
+    server.handleClient();
+    denyutnadi = lightMeter.readLightLevel(); // Baca data dari sensor BH1750
+    spo = random(0, 100); // Data acak kedua antara 0 dan 100
+    suhu = random(0, 100); // Data acak ketiga antara 0 dan 100
+    updateDisplay();
+    delay(1000); // Update display setiap 1 detik
 }
