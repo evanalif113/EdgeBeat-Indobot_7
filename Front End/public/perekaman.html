@@ -53,6 +53,27 @@
             <!-- Data terakhir akan ditampilkan di sini -->
         </div>
     </section>
+    <!-- Main Content -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Grafik Denyut Nadi</div>
+        <div class="card-body">
+        <div id="heartbeat-chart" class="chart-container mb-4"></div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Grafik Saturasi Oksigen</div>
+        <div class="card-body">
+        <div id="spo-chart" class="chart-container mb-4"></div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Grafik Suhu Tubuh</div>
+        <div class="card-body">
+        <div id="suhu-chart" class="chart-container mb-4"></div>
+        </div>
+    </div>
 
     <!-- Modal Sukses -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
@@ -110,21 +131,25 @@
         const firestore = getFirestore(app);
 
         async function getLastRegistration() {
-        const q = query(collection(firestore, 'pendaftaran'), orderBy('id', 'desc'), limit(1));
-        const querySnapshot = await getDocs(q);
-        let lastData = {};
-        querySnapshot.forEach((doc) => {
-            lastData = doc.data();
-        });
-        return lastData;
-    }
+            const q = query(collection(firestore, 'pendaftaran'), orderBy('id', 'desc'), limit(1));
+            const querySnapshot = await getDocs(q);
+            let lastData = {};
+            querySnapshot.forEach((doc) => {
+                lastData = { id: doc.id, ...doc.data() };
+            });
+            return lastData;
+        }
 
-    async function displayLastRegistration() {
-        const lastData = await getLastRegistration();
-        document.getElementById('last-registration').innerHTML = `
-                <div class="card">
+        async function displayLastRegistration() {
+            const lastData = await getLastRegistration();
+            document.getElementById('last-registration').innerHTML = `
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title">Data Pengguna</h5>
+                    </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>ID:</strong> ${lastData.id}</li>
                             <li class="list-group-item"><strong>Nama:</strong> ${lastData.nama}</li>
                             <li class="list-group-item"><strong>Umur:</strong> ${lastData.umur}</li>
                             <li class="list-group-item"><strong>Gender:</strong> ${lastData.gender}</li>
@@ -132,10 +157,116 @@
                     </div>
                 </div>
             `;
-    }
+        }
 
-    // Call the function to display the data when the page loads
-    window.onload = displayLastRegistration;
+        // Fungsi untuk mengambil data terbaru menggunakan Firebase Realtime Database
+        function fetchLastData() {
+            var hour = 1;
+            var fetchCount = hour * 60;
+            var dataRef = query(ref(database, `rekaman/${sensorId}/data`), orderByKey(), limitToLast(fetchCount));
+
+            get(dataRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    Object.values(data).forEach(entry => {
+                        // Konversi timestamp ke waktu terformat
+                        var timeFormatted = new Date(entry.timestamp * 1000)
+                                            .toLocaleTimeString([], { 
+                                                hour: '2-digit', 
+                                                minute: '2-digit', 
+                                                second: '2-digit', 
+                                                hour12: false 
+                                            });
+
+                        // Update array dengan data baru (geser array ketika data melebihi panjang maksimum)
+                        updateDataArray(timestamps, timeFormatted);
+                        updateDataArray(temperatures, entry.temperature);
+                        updateDataArray(humidity, entry.humidity);
+                    });
+
+                    // Update chart dengan data baru
+                    updateCharts();
+                } else {
+                    console.warn("Tidak ada data yang tersedia.");
+                }
+            }).catch((error) => {
+                console.error("Error fetching data: ", error);
+            });
+        }
+
+        // Fungsi untuk mengupdate array data dengan panjang maksimal 60
+        function updateDataArray(array, newValue) {
+            if (array.length >= maxDataLength) {
+                array.shift();  // Hapus elemen pertama
+            }
+            array.push(newValue);  // Tambahkan nilai baru di akhir
+        }
+
+        // Fungsi untuk menampilkan chart suhu
+        function plotHeartBeatChart() {
+            var trace = {
+                x: timestamps,
+                y: temperatures,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Suhu Lingkungan (°C)',
+                line: { color: '#C70039' }
+            };
+
+            var layout = {
+                title: 'Suhu Lingkungan (°C)',
+                xaxis: { title: 'Waktu' },
+                yaxis: { title: 'Suhu Lingkungan (°C)' },
+                height: 400
+            };
+
+            Plotly.newPlot('heartbeat-chart', [trace], layout);
+        }
+
+        // Fungsi untuk menampilkan chart kelembapan
+        function plotSPOChart() {
+            var trace = {
+                x: timestamps,
+                y: humidity,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Kelembapan Relatif (%)',
+                line: { color: '#006BFF' }
+            };
+
+            var layout = {
+                title: 'Kelembapan Relatif (%)',
+                xaxis: { title: 'Waktu' },
+                yaxis: { title: 'Kelembapan Relatif (%)' },
+                height: 400
+            };
+
+            Plotly.newPlot('spo-chart', [trace], layout);
+        }
+
+        // Fungsi untuk menampilkan chart titik embun
+        function plotSuhuChart() {
+            var trace = {
+                x: timestamps,
+                y: dew,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Titik Embun (°C)',
+                line: { color: '#4F75FF' }
+            };
+
+            var layout = {
+                title: 'Titik Embun (°C)',
+                xaxis: { title: 'Waktu' },
+                yaxis: { title: 'Titik Embun (°C)' },
+                height: 400
+            };
+
+            Plotly.newPlot('suhu-chart', [trace], layout);
+        }
+
+        // Call the function to display the data when the page loads
+        window.onload = displayLastRegistration;
     </script>
 
     <!-- Footer -->
@@ -147,6 +278,8 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="./script/navigation.js"> </script>
 </body>
 </html>
