@@ -221,7 +221,7 @@
             array.push(newValue);  // Tambahkan nilai baru di akhir
         }
 
-        // Fungsi untuk menampilkan chart suhu
+        // Fungsi untuk menampilkan chart Denyut Nadi
         function plotHeartBeatChart() {
             var trace = {
                 x: timestamps,
@@ -233,7 +233,7 @@
             };
 
             var layout = {
-                title: 'Suhu Lingkungan (°C)',
+                title: 'Denyut Nadi (bpm)',
                 xaxis: { title: 'Waktu' },
                 yaxis: { title: 'Suhu Lingkungan (°C)' },
                 height: 400
@@ -242,7 +242,7 @@
             Plotly.newPlot('heartbeat-chart', [trace], layout);
         }
 
-        // Fungsi untuk menampilkan chart kelembapan
+        // Fungsi untuk menampilkan chart Saturasi Oksigen
         function plotSPOChart() {
             var trace = {
                 x: timestamps,
@@ -263,7 +263,7 @@
             Plotly.newPlot('spo-chart', [trace], layout);
         }
 
-        // Fungsi untuk menampilkan chart titik embun
+        // Fungsi untuk menampilkan chart Suhu Tubuh
         function plotSuhuChart() {
             var trace = {
                 x: timestamps,
