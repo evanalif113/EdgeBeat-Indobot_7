@@ -76,8 +76,7 @@
     </div>
 
     <div class="container text-center my-4">
-        <button id="start-recording" class="btn btn-success me-2">Mulai Rekam</button>
-        <button id="stop-recording" class="btn btn-danger">Berhenti Rekam</button>
+        <button id="toggle-recording" class="btn btn-primary">Mulai Rekam</button>
     </div>
 
     
@@ -285,8 +284,8 @@
             Plotly.newPlot('suhu-chart', [trace], layout);
         }
 
-    // Function to show toast
-    function showToast(message) {
+// Function to show toast
+function showToast(message) {
         const toastElement = document.getElementById('recording-toast');
         const toastBody = toastElement.querySelector('.toast-body');
         toastBody.textContent = message;
@@ -294,31 +293,27 @@
         toast.show();
     }
 
-    // Function to start recording
-    document.getElementById('start-recording').addEventListener('click', () => {
-        set(ref(database, 'statusrekam'), 1)
-            .then(() => {
-                console.log('Recording started');
-                showToast('Rekaman dimulai');
-            })
-            .catch((error) => {
-                console.error('Error starting recording:', error);
-                showToast('Gagal memulai rekaman');
-            });
-    });
+    // Function to toggle recording status
+    async function toggleRecording() {
+        const statusRef = ref(database, 'statusrekam');
+        const statusSnapshot = await get(statusRef);
+        const currentStatus = statusSnapshot.val();
+        const newStatus = currentStatus === 1 ? 0 : 1;
 
-    // Function to stop recording
-    document.getElementById('stop-recording').addEventListener('click', () => {
-        set(ref(database, 'statusrekam'), 0)
+        set(statusRef, newStatus)
             .then(() => {
-                console.log('Recording stopped');
-                showToast('Rekaman dihentikan');
+                const button = document.getElementById('toggle-recording');
+                button.textContent = newStatus === 1 ? 'Berhenti Rekam' : 'Mulai Rekam';
+                showToast(newStatus === 1 ? 'Rekaman dimulai' : 'Rekaman dihentikan');
             })
             .catch((error) => {
-                console.error('Error stopping recording:', error);
-                showToast('Gagal menghentikan rekaman');
+                console.error('Error toggling recording:', error);
+                showToast('Gagal mengubah status rekaman');
             });
-    });
+    }
+
+    // Add event listener to the button
+    document.getElementById('toggle-recording').addEventListener('click', toggleRecording);
 
         // Call the function to display the data when the page loads
         window.onload = displayLastRegistration;
