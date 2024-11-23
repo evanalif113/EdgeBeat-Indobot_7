@@ -1,57 +1,83 @@
 #include <WiFi.h>
 #include <Wire.h>
-#include <WebServer.h>
-#include <LittleFS.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "MAX30105.h"
 #include "spo2_algorithm.h"
-#include <ArduinoJson.h>
-#include <Update.h>
+#include "FS.h"
 
+#define SCREEN_WIDTH 128 // Lebar OLED
+#define SCREEN_HEIGHT 64 // Tinggi OLED
+#define OLED_RESET    -1 // Reset pin (gunakan -1 jika tidak ada)
 
-const char* ssid = "server";
-const char* password = "jeris6467";
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+MAX30105 particleSensor;
 
-WebServer server(80);
+uint32_t irBuffer[100];   // Data sensor LED inframerah
+uint32_t redBuffer[100];  // Data sensor LED merah
+
+int32_t bufferLength;     // Panjang data
+int32_t spo2;             // Nilai SPO2
+int8_t validSPO2;         // Validitas perhitungan SPO2
+int32_t heartRate;        // Nilai detak jantung
+int8_t validHeartRate;    // Validitas perhitungan detak jantung
 
 void setup() {
-    Serial.begin(115200);
+  Wire.begin(2, 3); // Inisialisasi I2C dengan SDA di pin 2, SCL di pin 3
+  Serial.begin(115200); 
 
-    // Inisialisasi Wi-Fi
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.println("Connecting to WiFi...");
-    }
-    Serial.println("Connected to WiFi");
-    Serial.println(WiFi.localIP());
+  // Inisialisasi OLED
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Alamat I2C OLED adalah 0x3C
+    Serial.println(F("OLED tidak ditemukan"));
+    while (1);
+  }
+  display.clearDisplay(); //Memastikan OLED display clear
+  display.display();
 
-    // Inisialisasi LittleFS
-    if (!LittleFS.begin()) {
-        Serial.println("An error has occurred while mounting LittleFS");
-        return;
-    }
-    Serial.println("LittleFS mounted successfully");
+  // Inisialisasi sensor MAX30105
+  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
+    Serial.println(F("MAX30102 tidak ditemukan"));
+    while (1);
+  }
 
-    // Menyajikan file `index.html` dari LittleFS
-    server.serveStatic("/", LittleFS, "/index.html");
-
-    // Rute untuk mendapatkan data acak
-    server.on("/data", HTTP_GET, []() {
-        JsonDocument doc;
-        doc["value1"] = random(0, 100); // Data acak pertama antara 0 dan 100
-        doc["value2"] = random(0, 100); // Data acak kedua antara 0 dan 100
-        doc["value3"] = random(0, 100); // Data acak ketiga antara 0 dan 100
-        String response;
-        serializeJson(doc, response);
-        server.send(200, "application/json", response);
-    });
-
-    server.begin();
-    Serial.println("HTTP server started");
+  // Konfigurasi sensor
+  particleSensor.setup(60, 4, 2, 100, 411, 4096);
 }
 
 void loop() {
-    server.handleClient();
+  // Membaca suhu
+  float temperature = particleSensor.readTemperature();
+  float Calibrate = temperature - 9;
+
+  // Mengumpulkan data detak jantung dan SpO2
+  bufferLength = 100;
+  for (byte i = 0; i < bufferLength; i++) {
+    while (particleSensor.available() == false) {
+      particleSensor.check();
+    }
+    redBuffer[i] = particleSensor.getRed();
+    irBuffer[i] = particleSensor.getIR();
+    particleSensor.nextSample();
+  }
+
+  // Menghitung detak jantung dan SpO2
+  maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+
+  // Menampilkan data ke OLED
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  
+  display.setCursor(0, 0);
+  display.println("Heart Rate: " + String(heartRate) + " bpm");
+
+  display.setCursor(0, 10);
+  display.println("SpO2: " + String(spo2) + "%");
+
+  display.setCursor(0, 20);
+  display.println("Temp: " + String(Calibrate, 1) + " C");
+
+  display.display();
+
+  delay(1000); // Update setiap detik
 }
