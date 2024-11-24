@@ -161,7 +161,8 @@
 
         async function displayLastRegistration() {
             const lastData = await getLastRegistration();
-            document.getElementById('last-registration').innerHTML = `
+            document.getElementById('last-registration').innerHTML = 
+            `
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="card-title">Data Pengguna</h5>
@@ -199,8 +200,9 @@
 
                         // Update array dengan data baru (geser array ketika data melebihi panjang maksimum)
                         updateDataArray(timestamps, timeFormatted);
-                        updateDataArray(temperatures, entry.temperature);
-                        updateDataArray(humidity, entry.humidity);
+                        updateDataArray(heart, entry.heart);
+                        updateDataArray(spo, entry.spo);
+                        updateDataArray(suhu, entry.suhu);
                     });
 
                     // Update chart dengan data baru
