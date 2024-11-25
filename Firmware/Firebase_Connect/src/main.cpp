@@ -1,151 +1,127 @@
-/**
- * SYNTAX:
- *
- * RealtimeDatabase::get(<AsyncClient>, <path>, <AsyncResultCallback>, <SSE>, <uid>);
- *
- * RealtimeDatabase::get(<AsyncClient>, <path>, <DatabaseOption>, <AsyncResultCallback>, <uid>);
- *
- * <AsyncClient> - The async client.
- * <path> - The node path to get/watch the value.
- * <DatabaseOption> - The database options (DatabaseOptions).
- * <AsyncResultCallback> - The async result callback (AsyncResultCallback).
- * <uid> - The user specified UID of async result (optional).
- * <SSE> - The Server-sent events (HTTP Streaming) mode.
- *
- * The complete usage guidelines, please visit https://github.com/mobizt/FirebaseClient
- */
-
 #include <Arduino.h>
 #include <WiFi.h>
-#include <FirebaseClient.h>
+#include <Firebase_ESP_Client.h>
+#include "time.h"
 
-#define WIFI_SSID "WIFI_AP"
-#define WIFI_PASSWORD "WIFI_PASSWORD"
+// Informasi Wi-Fi
+#define WIFI_SSID "MELON_KEBAKALAN"
+#define WIFI_PASSWORD "Melon1234#"
 
-// The API key can be obtained from Firebase console > Project Overview > Project settings.
-#define API_KEY ""
+// Informasi Firebase
+#define API_KEY "YOUR_FIREBASE_API_KEY"
+#define DATABASE_URL "staklimjerukagung-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define USER_EMAIL "YOUR_EMAIL@example.com"
+#define USER_PASSWORD "YOUR_PASSWORD"
 
-// User Email and password that already registerd or added in your project.
-#define USER_EMAIL "USER_EMAIL"
-#define USER_PASSWORD "USER_PASSWORD"
-#define DATABASE_URL "URL"
+// Objek Firebase
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
 
-void asyncCB(AsyncResult &aResult);
+// UID pengguna dan jalur database
+String uid;
+String databasePath = "/rekaman";
+String parentPath;
 
-void printResult(AsyncResult &aResult);
+// Jalur data anak
+String heartbeatPath = "/heartbeat";
+String spoPath = "/spo";
+String suhuTubuhPath = "/suhu_tubuh";
+String timePath = "/timestamp";
 
-DefaultNetwork network;
+// Variabel waktu
+const char* ntpServer = "pool.ntp.org";
+unsigned long sendDataPrevMillis = 0;
+unsigned long timerDelay = 60000; // Kirim data setiap 60 detik
 
-UserAuth user_auth(API_KEY, USER_EMAIL, USER_PASSWORD);
-
-FirebaseApp app;
-
-#if defined(ESP32) || defined(ESP8266) || defined(ARDUINO_RASPBERRY_PI_PICO_W)
-#include <WiFiClientSecure.h>
-WiFiClientSecure ssl_client;
-#elif defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_UNOWIFIR4) || defined(ARDUINO_GIGA) || defined(ARDUINO_OPTA) || defined(ARDUINO_PORTENTA_C33) || defined(ARDUINO_NANO_RP2040_CONNECT)
-#include <WiFiSSLClient.h>
-WiFiSSLClient ssl_client;
-#endif
-
-using AsyncClient = AsyncClientClass;
-
-AsyncClient aClient(ssl_client, getNetwork(network));
-
-RealtimeDatabase Database;
-
-bool taskComplete = false;
-
-void setup()
-{
-
-    Serial.begin(115200);
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-    Serial.print("Connecting to Wi-Fi");
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print(".");
-        delay(300);
-    }
-    Serial.println();
-    Serial.print("Connected with IP: ");
-    Serial.println(WiFi.localIP());
-    Serial.println();
-
-    Firebase.printf("Firebase Client v%s\n", FIREBASE_CLIENT_VERSION);
-
-    Serial.println("Initializing app...");
-
-#if defined(ESP32) || defined(ESP8266) || defined(PICO_RP2040)
-    ssl_client.setInsecure();
-#if defined(ESP8266)
-    ssl_client.setBufferSizes(4096, 1024);
-#endif
-#endif
-
-    initializeApp(aClient, app, getAuth(user_auth), asyncCB, "authTask");
-
-    // Binding the FirebaseApp for authentication handler.
-    // To unbind, use Database.resetApp();
-    app.getApp<RealtimeDatabase>(Database);
-
-    Database.url(DATABASE_URL);
+// Inisialisasi Wi-Fi
+void initWiFi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Menghubungkan ke WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("\nWiFi terhubung: " + WiFi.localIP().toString());
 }
 
-void loop()
-{
-    // The async task handler should run inside the main loop
-    // without blocking delay or bypassing with millis code blocks.
-
-    app.loop();
-
-    Database.loop();
-
-    if (app.ready() && !taskComplete)
-    {
-        taskComplete = true;
-
-        Database.get(aClient, "/test/int", asyncCB, false, "getTask1");
-
-        Database.get(aClient, "/test/string", asyncCB, false, "getTask2");
-
-        // Filtering data
-        // For REST API, indexing the data at /test/filter/json is required when filtering the data, please see examples/Database/Extras/Sync/IndexingData/IndexingData.ino.
-        DatabaseOptions options;
-        options.filter.orderBy("Data").startAt(105).endAt(120).limitToLast(8);
-
-        Database.get(aClient, "/test/filter/json", options, asyncCB, "getTask3");
-    }
+// Inisialisasi waktu dengan NTP
+void initTime() {
+  configTime(7 * 3600, 0, ntpServer);
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("Gagal mendapatkan waktu!");
+    return;
+  }
+  Serial.println(&timeinfo, "Waktu saat ini: %A, %d %B %Y %H:%M:%S");
 }
 
-void asyncCB(AsyncResult &aResult)
-{
-    // WARNING!
-    // Do not put your codes inside the callback and printResult.
-
-    printResult(aResult);
+// Dapatkan waktu saat ini sebagai timestamp
+unsigned long getTime() {
+  time_t now;
+  time(&now);
+  return now;
 }
 
-void printResult(AsyncResult &aResult)
-{
-    if (aResult.isEvent())
-    {
-        Firebase.printf("Event task: %s, msg: %s, code: %d\n", aResult.uid().c_str(), aResult.appEvent().message().c_str(), aResult.appEvent().code());
-    }
+// Konfigurasi Firebase
+void initFirebase() {
+  config.api_key = API_KEY;
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
+  config.database_url = DATABASE_URL;
 
-    if (aResult.isDebug())
-    {
-        Firebase.printf("Debug task: %s, msg: %s\n", aResult.uid().c_str(), aResult.debug().c_str());
-    }
+  Firebase.reconnectWiFi(true);
+  Firebase.begin(&config, &auth);
 
-    if (aResult.isError())
-    {
-        Firebase.printf("Error task: %s, msg: %s, code: %d\n", aResult.uid().c_str(), aResult.error().message().c_str(), aResult.error().code());
-    }
+  Serial.println("Mengambil UID pengguna...");
+  while (auth.token.uid == "") {
+    delay(1000);
+    Serial.print(".");
+  }
+  uid = auth.token.uid.c_str();
+  Serial.println("\nUID berhasil didapatkan: " + uid);
+}
 
-    if (aResult.available())
-    {
-        Firebase.printf("task: %s, payload: %s\n", aResult.uid().c_str(), aResult.c_str());
+// Generate data acak untuk heartbeat, spo, suhu tubuh
+float generateRandomData(float min, float max) {
+  return min + (float)(rand()) / ((float)(RAND_MAX / (max - min)));
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Inisialisasi
+  initWiFi();
+  initTime();
+  initFirebase();
+}
+
+void loop() {
+  // Kirim data setiap interval tertentu
+  if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
+    sendDataPrevMillis = millis();
+
+    // Dapatkan pembacaan data acak
+    float heartbeat = generateRandomData(60, 100);   // Contoh: 60-100 bpm
+    float spo = generateRandomData(90, 100);          // Contoh: 90-100%
+    float suhu_tubuh = generateRandomData(36.5, 37.5); // Contoh: 36.5-37.5°C
+    unsigned long timestamp = getTime();
+
+    // Buat jalur parent dengan timestamp
+    parentPath = databasePath + "/" + String(timestamp);
+
+    // Kirim data ke Firebase
+    FirebaseJson json;
+    json.set(heartbeatPath.c_str(), heartbeat);
+    json.set(spoPath.c_str(), spo);
+    json.set(suhuTubuhPath.c_str(), suhu_tubuh);
+    json.set(timePath.c_str(), String(timestamp));
+
+    Serial.printf("Mengirim data ke Firebase...\n");
+    if (Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json)) {
+      Serial.println("Data berhasil dikirim.");
+    } else {
+      Serial.println("Gagal mengirim data: " + fbdo.errorReason());
     }
+  }
 }
