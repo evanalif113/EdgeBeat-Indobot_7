@@ -8,10 +8,10 @@
 #define WIFI_PASSWORD "Melon1234#"
 
 // Informasi Firebase
-#define API_KEY "YOUR_FIREBASE_API_KEY"
-#define DATABASE_URL "staklimjerukagung-default-rtdb.asia-southeast1.firebasedatabase.app"
-#define USER_EMAIL "YOUR_EMAIL@example.com"
-#define USER_PASSWORD "YOUR_PASSWORD"
+#define API_KEY "AIzaSyA-GgbbQkIOWRJ2nYgGkYTq8EaN4h1R2HQ"
+#define DATABASE_URL "https://edgebeat-indobot7-default-rtdb.asia-southeast1.firebasedatabase.app/"
+#define USER_EMAIL "esp32@mail.com"
+#define USER_PASSWORD "esp32riset"
 
 // Objek Firebase
 FirebaseData fbdo;
