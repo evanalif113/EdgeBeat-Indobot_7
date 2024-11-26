@@ -7,3 +7,6 @@ document.getElementById('NavHome').addEventListener('click', function() {
 document.getElementById('NavPerekaman').addEventListener('click', function() {
     window.location.href = './perekaman.html'; // Ganti dengan link halaman yang diinginkan
 });
+
+//Navigasi Tentang
+//document.getElementById
