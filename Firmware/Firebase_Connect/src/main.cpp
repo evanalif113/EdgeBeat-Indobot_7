@@ -24,10 +24,15 @@ FirebaseAuth auth;
 FirebaseConfig config;
 FirebaseJson json;
 
+// Define PROJECT_ID
+#define PROJECT_ID "edgebeat-indobot7"
+
 // UID pengguna dan jalur database
 String uid;
 String databasePath;
 String parentPath;
+
+String documentPath = "pendaftaran";
 
 int timestamp;
 
@@ -67,7 +72,7 @@ unsigned long getTime() {
 
 // Konfigurasi Firebase
 void FirebaseSetup() {
-configTime(0, 0, ntpServer); //NTP Server
+  configTime(0, 0, ntpServer); //NTP Server
   // Assign the api key (required)
   config.api_key = API_KEY;
   // Assign the user sign in credentials
@@ -129,6 +134,13 @@ void DataFirebase() {
     Serial.println(ESP.getFreeHeap());
 }
 
+void readFirestoreCollection() {
+     if (Firebase.Firestore.runQuery(&fbdo, PROJECT_ID, "" ))
+            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+        else
+            Serial.println(fbdo.errorReason());
+}
+
 void setup() {
   Serial.begin(115200);
   initWiFi();
@@ -138,6 +150,7 @@ void setup() {
 void loop() {
   // Kirim data setiap interval tertentu
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
+    readFirestoreCollection();
     DataFirebase();
     sendDataPrevMillis = millis();
   }
