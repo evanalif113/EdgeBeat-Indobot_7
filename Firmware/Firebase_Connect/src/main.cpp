@@ -3,9 +3,14 @@
 #include <Firebase_ESP_Client.h>
 #include "time.h"
 
+// Provide the token generation process info.
+#include "addons/TokenHelper.h"
+// Provide the RTDB payload printing info and other helper functions.
+#include "addons/RTDBHelper.h"
+
 // Informasi Wi-Fi
-#define WIFI_SSID "MELON_KEBAKALAN"
-#define WIFI_PASSWORD "Melon1234#"
+#define WIFI_SSID "server"
+#define WIFI_PASSWORD "jeris6467"
 
 // Informasi Firebase
 #define API_KEY "AIzaSyA-GgbbQkIOWRJ2nYgGkYTq8EaN4h1R2HQ"
@@ -17,6 +22,7 @@
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
+FirebaseJson json;
 
 // UID pengguna dan jalur database
 String uid;
@@ -32,7 +38,7 @@ String timePath = "/timestamp";
 // Variabel waktu
 const char* ntpServer = "pool.ntp.org";
 unsigned long sendDataPrevMillis = 0;
-unsigned long timerDelay = 60000; // Kirim data setiap 60 detik
+unsigned long timerDelay = 5000; // Kirim data setiap 60 detik
 
 // Inisialisasi Wi-Fi
 void initWiFi() {
@@ -59,6 +65,11 @@ void initTime() {
 // Dapatkan waktu saat ini sebagai timestamp
 unsigned long getTime() {
   time_t now;
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    //Serial.println("Failed to obtain time");
+    return(0);
+  }
   time(&now);
   return now;
 }
@@ -72,6 +83,13 @@ void initFirebase() {
 
   Firebase.reconnectWiFi(true);
   Firebase.begin(&config, &auth);
+  fbdo.setResponseSize(4096);
+
+  // Assign the callback function for the long running token generation task */
+  config.token_status_callback = tokenStatusCallback; //see addons/TokenHelper.h
+
+  // Assign the maximum retry of token generation
+  config.max_token_generation_retry = 5;
 
   Serial.println("Mengambil UID pengguna...");
   while (auth.token.uid == "") {
@@ -110,18 +128,12 @@ void loop() {
     // Buat jalur parent dengan timestamp
     parentPath = databasePath + "/" + String(timestamp);
 
-    // Kirim data ke Firebase
-    FirebaseJson json;
     json.set(heartbeatPath.c_str(), heartbeat);
     json.set(spoPath.c_str(), spo);
     json.set(suhuTubuhPath.c_str(), suhu_tubuh);
     json.set(timePath.c_str(), String(timestamp));
 
     Serial.printf("Mengirim data ke Firebase...\n");
-    if (Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json)) {
-      Serial.println("Data berhasil dikirim.");
-    } else {
-      Serial.println("Gagal mengirim data: " + fbdo.errorReason());
-    }
+    Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
 }
