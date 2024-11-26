@@ -33,8 +33,9 @@ String databasePath;
 String parentPath;
 
 String documentPath = "pendaftaran";
-
+unsigned int ledPin = 2;
 int timestamp;
+int status;
 
 // Jalur data anak
 String heartbeatPath = "/heartbeat";
@@ -134,15 +135,21 @@ void DataFirebase() {
     Serial.println(ESP.getFreeHeap());
 }
 
-void readFirestoreCollection() {
-     if (Firebase.Firestore.runQuery(&fbdo, PROJECT_ID, "" ))
-            Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
-        else
-            Serial.println(fbdo.errorReason());
+void readFirebase() {
+  String statusPath = "/statusrekam";
+  if (Firebase.RTDB.getInt(&fbdo, statusPath.c_str())) {
+    status = fbdo.intData();
+    Serial.print("Status rekam: ");
+    Serial.println(status);
+  } else {
+    Serial.print("Gagal mendapatkan status rekam: ");
+    Serial.println(fbdo.errorReason());
+  }
 }
 
 void setup() {
   Serial.begin(115200);
+  pinMode(ledPin, OUTPUT);
   initWiFi();
   FirebaseSetup();
 }
@@ -150,8 +157,9 @@ void setup() {
 void loop() {
   // Kirim data setiap interval tertentu
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
-    readFirestoreCollection();
+    readFirebase();
     DataFirebase();
+    digitalWrite(ledPin, status);
     sendDataPrevMillis = millis();
   }
 }
