@@ -79,7 +79,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title">Berhasil</h5>
-                    <button type="button" class="btn-close" id="NavPerekaman" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     Data berhasil dikirim!
@@ -107,7 +107,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getDatabase, ref, child, push, set , get} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-        import { getFirestore, doc, setDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
         // Firebase configuration
@@ -126,7 +125,6 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
-        const firestore = getFirestore(app);
 
         document.getElementById('formPendaftaran').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -135,42 +133,43 @@
             const umur = document.getElementById('umur').value;
             const gender = document.querySelector('input[name="gender"]:checked').value;
 
-        try {
-        // Referensi ke koleksi 'pendaftaran'
-        const pendaftaranCollection = collection(firestore, 'pendaftaran');
+            try {
+            // Referensi ke database 'pendaftaran'
+            const pendaftaranRef = ref(database, 'pendaftaran');
 
-        // Ambil ID terakhir dari dokumen yang ada
-        const q = query(pendaftaranCollection, orderBy("id", "desc"), limit(1));
-        const querySnapshot = await getDocs(q);
+            // Ambil ID terakhir dari database
+            const snapshot = await get(pendaftaranRef);
+            let newID = 1; // Default ID jika tidak ada data
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const ids = Object.keys(data).map(id => parseInt(id));
+                newID = Math.max(...ids) + 1; // Tambahkan 1 ke ID terakhir
+            }
 
-        let newID = 1; // Default ID jika tidak ada data
-        if (!querySnapshot.empty) {
-            const lastDoc = querySnapshot.docs[0];
-            newID = lastDoc.data().id + 1; // Tambahkan 1 ke ID terakhir
-        }
+            // Data baru yang akan disimpan
+            const newData = {
+                id: newID, // Menyimpan ID sebagai field di dokumen
+                nama,
+                umur,
+                gender
+            };
 
-        // Data baru yang akan disimpan
-        const newData = {
-            id: newID, // Menyimpan ID sebagai field di dokumen
-            nama,
-            umur,
-            gender
-        };
+            // Simpan data dengan ID numerik
+            await set(ref(database, `pendaftaran/${newID}`), newData);
+            // Tunggu 15 detik sebelum beralih ke halaman lain
+            setTimeout(() => {
+                window.location.href = './perekaman.html'; // Ganti 'anotherPage.html' dengan halaman tujuan Anda
+            }, 10000);
 
-        // Simpan data dengan ID numerik
-        await setDoc(doc(pendaftaranCollection, newID.toString()), newData);
-
-        // Tampilkan modal sukses
-        new bootstrap.Modal(document.getElementById('successModal')).show();
-        document.getElementById('formPendaftaran').reset();
-        }   
-
-        catch (error) {
-        console.error('Error:', error);
-        // Tampilkan modal error
-        new bootstrap.Modal(document.getElementById('errorModal')).show();
-        }
-    });
+            // Tampilkan modal sukses
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+            document.getElementById('formPendaftaran').reset();
+            } catch (error) {
+            console.error('Error:', error);
+            // Tampilkan modal error
+            new bootstrap.Modal(document.getElementById('errorModal')).show();
+            }
+        });
     </script>
 
     <!-- Footer -->

@@ -127,8 +127,7 @@
     <!-- Firebase Configuration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, child, push, set , get} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-        import { getFirestore, doc, setDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getDatabase, ref, child, push, set , get, query, orderByKey, limitToLast} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
         // Firebase configuration
@@ -147,37 +146,42 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
-        const firestore = getFirestore(app);
 
-        async function getLastRegistration() {
-            const q = query(collection(firestore, 'pendaftaran'), orderBy('id', 'desc'), limit(1));
-            const querySnapshot = await getDocs(q);
-            let lastData = {};
-            querySnapshot.forEach((doc) => {
-                lastData = { id: doc.id, ...doc.data() };
-            });
-            return lastData;
-        }
+        const dataRef = query(ref(database, 'perekaman'), orderByKey(), limitToLast(1));
 
         async function displayLastRegistration() {
-            const lastData = await getLastRegistration();
-            document.getElementById('last-registration').innerHTML = 
-            `
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
+            try {
+                const snapshot = await get(dataRef);
+                let lastData = {};
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    lastData = { id: childSnapshot.key, ...data };
+    
+                });
+                    
+                document.getElementById('last-registration').innerHTML = 
+                    `
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
                         <h5 class="card-title">Data Pengguna</h5>
-                    </div>
-                    <div class="card-body">
+                        </div>
+                        <div class="card-body">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item"><strong>ID:</strong> ${lastData.id}</li>
                             <li class="list-group-item"><strong>Nama:</strong> ${lastData.nama}</li>
                             <li class="list-group-item"><strong>Umur:</strong> ${lastData.umur}</li>
                             <li class="list-group-item"><strong>Gender:</strong> ${lastData.gender}</li>
                         </ul>
+                        </div>
                     </div>
-                </div>
-            `;
-        }
+                    `;
+                } else {
+                    document.getElementById('last-registration').innerHTML = '<p>No data available</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching last registration:', error);
+                document.getElementById('last-registration').innerHTML = '<p>Error fetching data</p>';
+            }
 
         // Fungsi untuk mengambil data terbaru menggunakan Firebase Realtime Database
         function fetchLastData() {
