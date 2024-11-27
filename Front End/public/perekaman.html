@@ -146,42 +146,51 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        
+        // Referensi data terbaru dari "pendaftaran"
+        const dataRef = query(ref(database, 'pendaftaran'), orderByKey(), limitToLast(1));
 
-        const dataRef = query(ref(database, 'perekaman'), orderByKey(), limitToLast(1));
-
-        async function displayLastRegistration() {
+        // Fungsi untuk menampilkan data terbaru
+        async function fetchLatestRegistration() {
             try {
                 const snapshot = await get(dataRef);
-                let lastData = {};
-                snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    lastData = { id: childSnapshot.key, ...data };
-    
-                });
-                    
-                document.getElementById('last-registration').innerHTML = 
-                    `
-                    <div class="card mb-4">
-                        <div class="card-header bg-primary text-white">
-                        <h5 class="card-title">Data Pengguna</h5>
+                if (snapshot.exists()) {
+                    let lastData = {};
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        lastData = { id: childSnapshot.key, ...data };
+                    });
+
+                    // Menampilkan data di HTML
+                    document.getElementById('last-registration').innerHTML = `
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title">Data Pendaftaran Terbaru</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><strong>ID:</strong> ${lastData.id}</li>
+                                    <li class="list-group-item"><strong>Nama:</strong> ${lastData.nama || 'N/A'}</li>
+                                    <li class="list-group-item"><strong>Umur:</strong> ${lastData.umur || 'N/A'}</li>
+                                    <li class="list-group-item"><strong>Gender:</strong> ${lastData.gender || 'N/A'}</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><strong>ID:</strong> ${lastData.id}</li>
-                            <li class="list-group-item"><strong>Nama:</strong> ${lastData.nama}</li>
-                            <li class="list-group-item"><strong>Umur:</strong> ${lastData.umur}</li>
-                            <li class="list-group-item"><strong>Gender:</strong> ${lastData.gender}</li>
-                        </ul>
-                        </div>
-                    </div>
                     `;
                 } else {
-                    document.getElementById('last-registration').innerHTML = '<p>No data available</p>';
+                    document.getElementById('last-registration').innerHTML = '<p>Data tidak tersedia</p>';
                 }
             } catch (error) {
-                console.error('Error fetching last registration:', error);
-                document.getElementById('last-registration').innerHTML = '<p>Error fetching data</p>';
+                console.error('Error fetching latest registration:', error);
+                document.getElementById('last-registration').innerHTML = '<p>Terjadi kesalahan saat mengambil data</p>';
             }
+        }
+
+        // Panggil fungsi untuk menampilkan data
+        
+
+
+            
 
         // Fungsi untuk mengambil data terbaru menggunakan Firebase Realtime Database
         function fetchLastData() {
@@ -324,7 +333,7 @@ async function toggleRecording() {
 document.getElementById('toggle-recording').addEventListener('click', toggleRecording);
 
         // Call the function to display the data when the page loads
-        window.onload = displayLastRegistration;
+        window.onload = fetchLatestRegistration();
     </script>
 
     <!-- Footer -->
