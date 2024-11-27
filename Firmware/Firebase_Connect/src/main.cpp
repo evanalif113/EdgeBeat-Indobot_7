@@ -108,7 +108,11 @@ float generateRandomData(float min, float max) {
   return min + (float)(rand()) / ((float)(RAND_MAX / (max - min)));
 }
 
-void DataFirebase() {
+void ReadLatestRegister() {
+  
+}
+
+void SendRekamanFirebase() {
     // Update database path
     databasePath = "/rekaman";
     timestamp = getTime();
@@ -135,7 +139,7 @@ void DataFirebase() {
     Serial.println(ESP.getFreeHeap());
 }
 
-void readFirebase() {
+void ReadFirebaseStatus() {
   String statusPath = "/statusrekam";
   if (Firebase.RTDB.getInt(&fbdo, statusPath.c_str())) {
     status = fbdo.intData();
@@ -157,8 +161,8 @@ void setup() {
 void loop() {
   // Kirim data setiap interval tertentu
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
-    readFirebase();
-    DataFirebase();
+    ReadStatusFirebase();
+    SendRekamanFirebase();
     digitalWrite(ledPin, status);
     sendDataPrevMillis = millis();
   }
