@@ -201,8 +201,9 @@ void loop() {
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
     ReadStatusFirebase();
     ReadLatestID();
+    if (status == 1) {
     SendRekamanFirebase();
-    //ReadLatestRegister();
+    }
     digitalWrite(ledPin, status);
     sendDataPrevMillis = millis();
   }
