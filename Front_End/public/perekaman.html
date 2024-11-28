@@ -141,6 +141,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        // Fungsi untuk mengambil ID dari database
         
         // Referensi data terbaru dari "pendaftaran"
         const dataRef = query(ref(database, 'pendaftaran'), orderByKey(), limitToLast(1));
@@ -179,7 +180,17 @@
                 document.getElementById('last-registration').innerHTML = '<p>Terjadi kesalahan saat mengambil data</p>';
             }
         }
-
+        
+        async function fetchID() {
+            const idRef = ref(database, 'id');
+            const snapshot = await get(idRef);
+            if (snapshot.exists()) {
+                return snapshot.val();
+            } else {
+                console.error('No ID found in database');
+                return null;
+            }
+        }
 
 
         const timestamps = [];
@@ -190,7 +201,8 @@
 
         async function fetchLastData() {
             const fetchCount = 60;
-            const dataRef = query(ref(database, `rekaman/1/`), orderByKey(), limitToLast(fetchCount));
+            const id = await fetchID();
+            const dataRef = query(ref(database, `rekaman/${id}/`), orderByKey(), limitToLast(fetchCount));
 
             get(dataRef).then((snapshot) => {
                 if (snapshot.exists()) {
