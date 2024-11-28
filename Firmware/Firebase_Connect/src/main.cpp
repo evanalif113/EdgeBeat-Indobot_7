@@ -2,6 +2,11 @@
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include "time.h"
+#include <Wire.h>
+#include "MAX30105.h"
+#include "spo2_algorithm.h"
+#include "SSD1306Wire.h" // Library SSD1306
+
 
 // Provide the token generation process info.
 #include "addons/TokenHelper.h"
@@ -9,14 +14,51 @@
 #include "addons/RTDBHelper.h"
 
 // Informasi Wi-Fi
-#define WIFI_SSID "server"
-#define WIFI_PASSWORD "jeris6467"
+#define WIFI_SSID "server" //Nama Wifi
+#define WIFI_PASSWORD "jeris6467" //Password Wifi
 
 // Informasi Firebase
 #define API_KEY "AIzaSyA-GgbbQkIOWRJ2nYgGkYTq8EaN4h1R2HQ"
 #define DATABASE_URL "https://edgebeat-indobot7-default-rtdb.asia-southeast1.firebasedatabase.app/"
 #define USER_EMAIL "untukalat@gmail.com"
 #define USER_PASSWORD "alat12345"
+
+#define SCREEN_WIDTH 128 // Lebar OLED
+#define SCREEN_HEIGHT 64 // Tinggi OLED
+#define OLED_RESET    -1 // Reset pin (gunakan -1 jika tidak ada)
+
+MAX30105 particleSensor;
+SSD1306Wire display(0x3c, 2, 3); // Initialize OLED display (I2C address, SDA, SCL)
+
+uint32_t irBuffer[100];   // Data sensor LED inframerah
+uint32_t redBuffer[100];  // Data sensor LED merah
+
+int32_t bufferLength;     // Panjang data
+int32_t spo2;             // Nilai SPO2
+int8_t validSPO2;         // Validitas perhitungan SPO2
+int32_t heartRate;        // Nilai detak jantung
+int8_t validHeartRate;    // Validitas perhitungan detak jantung
+uint calibratedTemperature;
+
+const uint8_t heart_icon[] = {
+  0b01110000, 0b00001110, // Row 1
+  0b11111000, 0b00011111, // Row 2
+  0b11111100, 0b00111111, // Row 3
+  0b11111110, 0b01111111, // Row 4
+  0b11111110, 0b01111111, // Row 5
+  0b11111110, 0b01111111, // Row 6
+  0b11111100, 0b00111111, // Row 7
+  0b11111000, 0b00011111, // Row 8
+  0b11110000, 0b00001111, // Row 9
+  0b11100000, 0b00000111, // Row 10
+  0b11000000, 0b00000011, // Row 11
+  0b10000000, 0b00000001, // Row 12
+  0b00000000, 0b00000000, // Row 13
+  0b00000000, 0b00000000, // Row 14
+  0b00000000, 0b00000000, // Row 15
+  0b00000000, 0b00000000  // Row 16
+
+};
 
 // Objek Firebase
 FirebaseData fbdo;
@@ -69,6 +111,60 @@ unsigned long getTime() {
   return now;
 }
 
+void initSensor() {
+  Wire.begin(2, 3); // Inisialisasi I2C dengan pin SDA=2, SCL=3
+  delay(500);
+
+  // Initialize OLED display
+  display.init();
+  display.setFont(ArialMT_Plain_16);
+  display.flipScreenVertically(); // Rotate display 180 degrees
+
+  // Initialize MAX30105 sensor
+  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
+    Serial.println(F("MAX30102 tidak ditemukan"));
+    while (1);
+  }
+
+  // Sensor configuration
+  particleSensor.setup(60, 4, 2, 100, 411, 4096); // LED pulse width, sample rate, LED current
+}
+
+void getData() {
+    // Read temperature and calibrate
+  float temperature = particleSensor.readTemperature();
+  calibratedTemperature = temperature - 5;
+
+  // Collect heart rate and SpO2 data
+  bufferLength = 100; // Data length for calculation
+  for (byte i = 0; i < bufferLength; i++) {
+    while (particleSensor.available() == false) {
+      particleSensor.check();
+    }
+    redBuffer[i] = particleSensor.getRed();
+    irBuffer[i] = particleSensor.getIR();
+    particleSensor.nextSample();
+  }
+
+  // Calculate heart rate and SpO2
+  maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+
+  // Display data on OLED
+  display.clear();
+
+  // Display the heart icon at (0,0)
+  display.drawXbm(0, 0, 16, 16, (const char*)heart_icon); // Cast to const char*
+
+  // Display heart rate next to the heart icon
+  display.drawString(20, 0, String(heartRate) + " bpm");
+
+  // Display SpO2 and calibrated temperature
+  display.drawString(0, 20, "SpO2: " + String(spo2) + "%");
+  display.drawString(0, 40, "Temp: " + String(calibratedTemperature, 1) + " C");
+
+  display.display();
+}
+
 // Konfigurasi Firebase
 void FirebaseSetup() {
   configTime(0, 0, ntpServer); //NTP Server
@@ -101,43 +197,6 @@ void FirebaseSetup() {
   Serial.print("User UID: "); Serial.println(uid);
 }
 
-// Generate data acak untuk heartbeat, spo, suhu tubuh
-float generateRandomData(float min, float max) {
-  return min + (float)(rand()) / ((float)(RAND_MAX / (max - min)));
-}
-
-/*void ReadLatestRegister() {
-    String path = "/pendaftaran";
-
-  // Mendapatkan data terakhir dari Firebase
-  if (Firebase.RTDB.getJSON(&fbdo, path.c_str())) {
-    FirebaseJson& json = fbdo.jsonObject();
-    size_t len = json.iteratorBegin();
-    String lastKey;
-    for (size_t i = 0; i < len; i++) {
-      String key, value;
-      int type;
-      json.iteratorGet(i, type, key, value);
-      lastKey = key;
-    }
-    json.iteratorEnd();
-
-    // Mendapatkan data dari key terakhir
-    String lastPath = path + "/" + lastKey;
-    if (Firebase.RTDB.getInt(&fbdo, lastPath.c_str())) {
-      status = fbdo.intData();
-      Serial.print("Status rekam: ");
-      Serial.println(status);
-    } else {
-      Serial.print("Gagal mendapatkan status rekam: ");
-      Serial.println(fbdo.errorReason());
-    }
-  } else {
-    Serial.print("Gagal mendapatkan data: ");
-    Serial.println(fbdo.errorReason());
-  }
-}*/
-
 void ReadLatestID() {
   String idPath = "/id";
   if (Firebase.RTDB.getInt(&fbdo, idPath.c_str())) {
@@ -159,16 +218,13 @@ void SendRekamanFirebase() {
     Serial.println (espheapram);
     
     // Dapatkan pembacaan data acak
-    float heartbeat = generateRandomData(60, 100);   // Contoh: 60-100 bpm
-    float spo = generateRandomData(90, 100);          // Contoh: 90-100%
-    float suhu_tubuh = generateRandomData(36.5, 37.5); // Contoh: 36.5-37.5°C
     unsigned long timestamp = getTime();
 
     parentPath= databasePath + "/" + id + "/" + String(timestamp);
 
-    json.set(heartbeatPath.c_str(), String(heartbeat));
-    json.set(spoPath.c_str(), String(spo));
-    json.set(suhuTubuhPath.c_str(), String(suhu_tubuh));
+    json.set(heartbeatPath.c_str(), String(heartRate));
+    json.set(spoPath.c_str(), String(spo2));
+    json.set(suhuTubuhPath.c_str(), String(calibratedTemperature));
     json.set(timePath.c_str(), String(timestamp));
 
     Serial.printf("Set json... %s\n", 
@@ -192,6 +248,7 @@ void ReadStatusFirebase() {
 void setup() {
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
+  initSensor();
   initWiFi();
   FirebaseSetup();
 }
