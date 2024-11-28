@@ -192,17 +192,16 @@
             }
         }
 
-
         const timestamps = [];
         const heartRates = [];
         const spo2Levels = [];
         const bodyTemperatures = [];
         const maxDataLength = 60;
+        const angka = await fetchID();
 
         async function fetchLastData() {
             const fetchCount = 60;
-            const id = await fetchID();
-            const dataRef = query(ref(database, `rekaman/${id}/`), orderByKey(), limitToLast(fetchCount));
+            const dataRef = query(ref(database, `rekaman/${angka}/`), orderByKey(), limitToLast(fetchCount));
 
             get(dataRef).then((snapshot) => {
                 if (snapshot.exists()) {
@@ -210,7 +209,7 @@
                     Object.values(data).forEach(entry => {
                         // Konversi timestamp ke waktu terformat
                         const timeFormatted = new Date(entry.timestamp * 1000)
-                                                .toLocaleTimeString([], { 
+                                                .toLocaleString([], {
                                                     hour: '2-digit', 
                                                     minute: '2-digit', 
                                                     second: '2-digit', 
@@ -314,7 +313,7 @@
 
         // Panggil fungsi fetchLastData untuk mengambil data dan memperbarui chart
         fetchLastData();
-        setInterval(fetchLastData, 1000);
+        setInterval(fetchLastData, 5000);
 
 // Function to show toast
 function showToast(message) {

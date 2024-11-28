@@ -44,7 +44,7 @@ String timePath = "/timestamp";
 // Variabel waktu
 const char* ntpServer = "pool.ntp.org";
 unsigned long sendDataPrevMillis = 0;
-unsigned long timerDelay = 5000; // Kirim data setiap 60 detik
+unsigned long timerDelay = 2500; // Kirim data setiap 60 detik
 
 // Inisialisasi Wi-Fi
 void initWiFi() {
