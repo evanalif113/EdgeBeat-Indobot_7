@@ -180,13 +180,15 @@
             }
         }
 
+
+
         const timestamps = [];
         const heartRates = [];
         const spo2Levels = [];
         const bodyTemperatures = [];
         const maxDataLength = 60;
 
-        function fetchLastData() {
+        async function fetchLastData() {
             const fetchCount = 60;
             const dataRef = query(ref(database, `rekaman/1/`), orderByKey(), limitToLast(fetchCount));
 
