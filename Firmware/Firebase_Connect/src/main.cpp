@@ -24,9 +24,6 @@ FirebaseAuth auth;
 FirebaseConfig config;
 FirebaseJson json;
 
-// Define PROJECT_ID
-#define PROJECT_ID "edgebeat-indobot7"
-
 // UID pengguna dan jalur database
 String uid;
 String databasePath;
@@ -36,6 +33,7 @@ String documentPath = "pendaftaran";
 unsigned int ledPin = 2;
 int timestamp;
 int status;
+int id;
 
 // Jalur data anak
 String heartbeatPath = "/heartbeat";
@@ -108,8 +106,48 @@ float generateRandomData(float min, float max) {
   return min + (float)(rand()) / ((float)(RAND_MAX / (max - min)));
 }
 
-void ReadLatestRegister() {
-  
+/*void ReadLatestRegister() {
+    String path = "/pendaftaran";
+
+  // Mendapatkan data terakhir dari Firebase
+  if (Firebase.RTDB.getJSON(&fbdo, path.c_str())) {
+    FirebaseJson& json = fbdo.jsonObject();
+    size_t len = json.iteratorBegin();
+    String lastKey;
+    for (size_t i = 0; i < len; i++) {
+      String key, value;
+      int type;
+      json.iteratorGet(i, type, key, value);
+      lastKey = key;
+    }
+    json.iteratorEnd();
+
+    // Mendapatkan data dari key terakhir
+    String lastPath = path + "/" + lastKey;
+    if (Firebase.RTDB.getInt(&fbdo, lastPath.c_str())) {
+      status = fbdo.intData();
+      Serial.print("Status rekam: ");
+      Serial.println(status);
+    } else {
+      Serial.print("Gagal mendapatkan status rekam: ");
+      Serial.println(fbdo.errorReason());
+    }
+  } else {
+    Serial.print("Gagal mendapatkan data: ");
+    Serial.println(fbdo.errorReason());
+  }
+}*/
+
+void ReadLatestID() {
+  String idPath = "/id";
+  if (Firebase.RTDB.getInt(&fbdo, idPath.c_str())) {
+    id = fbdo.intData();
+    Serial.print("ID Terakhir: ");
+    Serial.println(id);
+  } else {
+    Serial.print("Gagal mendapatkan ID Terakhir: ");
+    Serial.println(fbdo.errorReason());
+  }
 }
 
 void SendRekamanFirebase() {
@@ -126,7 +164,7 @@ void SendRekamanFirebase() {
     float suhu_tubuh = generateRandomData(36.5, 37.5); // Contoh: 36.5-37.5°C
     unsigned long timestamp = getTime();
 
-    parentPath= databasePath + "/" + String(timestamp);
+    parentPath= databasePath + "/" + id + "/" + String(timestamp);
 
     json.set(heartbeatPath.c_str(), String(heartbeat));
     json.set(spoPath.c_str(), String(spo));
@@ -139,7 +177,7 @@ void SendRekamanFirebase() {
     Serial.println(ESP.getFreeHeap());
 }
 
-void ReadFirebaseStatus() {
+void ReadStatusFirebase() {
   String statusPath = "/statusrekam";
   if (Firebase.RTDB.getInt(&fbdo, statusPath.c_str())) {
     status = fbdo.intData();
@@ -162,7 +200,9 @@ void loop() {
   // Kirim data setiap interval tertentu
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
     ReadStatusFirebase();
+    ReadLatestID();
     SendRekamanFirebase();
+    //ReadLatestRegister();
     digitalWrite(ledPin, status);
     sendDataPrevMillis = millis();
   }
