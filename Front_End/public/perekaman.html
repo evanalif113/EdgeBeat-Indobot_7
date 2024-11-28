@@ -128,7 +128,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getDatabase, ref, child, push, set , get, query, orderByKey, limitToLast} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -144,12 +143,11 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const database = getDatabase(app);
         
         // Referensi data terbaru dari "pendaftaran"
         const dataRef = query(ref(database, 'pendaftaran'), orderByKey(), limitToLast(1));
-
+        let lastid;
         // Fungsi untuk menampilkan data terbaru
         async function fetchLatestRegistration() {
             try {
@@ -160,7 +158,6 @@
                         const data = childSnapshot.val();
                         lastData = { id: childSnapshot.key, ...data };
                     });
-
                     // Menampilkan data di HTML
                     document.getElementById('last-registration').innerHTML = `
                         <div class="card mb-4">
@@ -185,13 +182,7 @@
                 document.getElementById('last-registration').innerHTML = '<p>Terjadi kesalahan saat mengambil data</p>';
             }
         }
-
-        // Panggil fungsi untuk menampilkan data
         
-
-
-            
-
         // Fungsi untuk mengambil data terbaru menggunakan Firebase Realtime Database
         function fetchLastData() {
             var hour = 1;
