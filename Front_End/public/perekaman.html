@@ -182,31 +182,35 @@
                 document.getElementById('last-registration').innerHTML = '<p>Terjadi kesalahan saat mengambil data</p>';
             }
         }
-        
-        // Fungsi untuk mengambil data terbaru menggunakan Firebase Realtime Database
+
+        const timestamps = [];
+        const heartRates = [];
+        const spo2Levels = [];
+        const bodyTemperatures = [];
+        const maxDataLength = 60;
+
         function fetchLastData() {
-            var hour = 1;
-            var fetchCount = hour * 60;
-            var dataRef = query(ref(database, `rekaman/${sensorId}/data`), orderByKey(), limitToLast(fetchCount));
+            const fetchCount = 60;
+            const dataRef = query(ref(database, `rekaman/1/`), orderByKey(), limitToLast(fetchCount));
 
             get(dataRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     Object.values(data).forEach(entry => {
                         // Konversi timestamp ke waktu terformat
-                        var timeFormatted = new Date(entry.timestamp * 1000)
-                                            .toLocaleTimeString([], { 
-                                                hour: '2-digit', 
-                                                minute: '2-digit', 
-                                                second: '2-digit', 
-                                                hour12: false 
-                                            });
+                        const timeFormatted = new Date(entry.timestamp * 1000)
+                                                .toLocaleTimeString([], { 
+                                                    hour: '2-digit', 
+                                                    minute: '2-digit', 
+                                                    second: '2-digit', 
+                                                    hour12: false 
+                                                });
 
                         // Update array dengan data baru (geser array ketika data melebihi panjang maksimum)
                         updateDataArray(timestamps, timeFormatted);
-                        updateDataArray(heart, entry.heart);
-                        updateDataArray(spo, entry.spo);
-                        updateDataArray(suhu, entry.suhu);
+                        updateDataArray(heartRates, entry.heartbeat);
+                        updateDataArray(spo2Levels, entry.spo);
+                        updateDataArray(bodyTemperatures, entry.suhu_tubuh);
                     });
 
                     // Update chart dengan data baru
@@ -229,66 +233,77 @@
 
         // Fungsi untuk menampilkan chart Denyut Nadi
         function plotHeartBeatChart() {
-            var trace = {
+            const trace = {
                 x: timestamps,
-                y: temperatures,
+                y: heartRates,
                 type: 'scatter',
                 mode: 'lines+markers',
-                name: 'Suhu Lingkungan (°C)',
+                name: 'Denyut Nadi (bpm)',
                 line: { color: '#C70039' }
             };
 
-            var layout = {
+            const layout = {
                 title: 'Denyut Nadi (bpm)',
                 xaxis: { title: 'Waktu' },
-                yaxis: { title: 'Suhu Lingkungan (°C)' },
+                yaxis: { title: 'Denyut Nadi (bpm)' },
                 height: 400
             };
 
-            Plotly.newPlot('heartbeat-chart', [trace], layout);
+            Plotly.newPlot('heartbeat-chart', [trace], layout, {responsive :true} );
         }
 
         // Fungsi untuk menampilkan chart Saturasi Oksigen
         function plotSPOChart() {
-            var trace = {
+            const trace = {
                 x: timestamps,
-                y: humidity,
+                y: spo2Levels,
                 type: 'scatter',
                 mode: 'lines+markers',
-                name: 'Kelembapan Relatif (%)',
+                name: 'Saturasi Oksigen (%)',
                 line: { color: '#006BFF' }
             };
 
-            var layout = {
-                title: 'Kelembapan Relatif (%)',
+            const layout = {
+                title: 'Saturasi Oksigen (%)',
                 xaxis: { title: 'Waktu' },
-                yaxis: { title: 'Kelembapan Relatif (%)' },
+                yaxis: { title: 'Saturasi Oksigen (%)' },
                 height: 400
             };
 
-            Plotly.newPlot('spo-chart', [trace], layout);
+            Plotly.newPlot('spo-chart', [trace], layout, {responsive :true});
         }
 
         // Fungsi untuk menampilkan chart Suhu Tubuh
         function plotSuhuChart() {
-            var trace = {
+            const trace = {
                 x: timestamps,
-                y: dew,
+                y: bodyTemperatures,
                 type: 'scatter',
                 mode: 'lines+markers',
-                name: 'Titik Embun (°C)',
+                name: 'Suhu Tubuh (°C)',
                 line: { color: '#4F75FF' }
             };
 
-            var layout = {
-                title: 'Titik Embun (°C)',
+            const layout = {
+                title: 'Suhu Tubuh (°C)',
                 xaxis: { title: 'Waktu' },
-                yaxis: { title: 'Titik Embun (°C)' },
+                yaxis: { title: 'Suhu Tubuh (°C)' },
                 height: 400
             };
 
-            Plotly.newPlot('suhu-chart', [trace], layout);
+            Plotly.newPlot('suhu-chart', [trace], layout, {responsive :true});
         }
+
+        // Fungsi untuk mengupdate semua chart
+        function updateCharts() {
+            plotHeartBeatChart();
+            plotSPOChart();
+            plotSuhuChart();
+        }
+
+        // Panggil fungsi fetchLastData untuk mengambil data dan memperbarui chart
+        fetchLastData();
+        setInterval(fetchLastData, 1000);
 
 // Function to show toast
 function showToast(message) {
