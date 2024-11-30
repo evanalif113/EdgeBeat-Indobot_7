@@ -131,7 +131,7 @@ void initSensor() {
 }
 
 void getData() {
-    // Read temperature and calibrate
+  // Read temperature and calibrate
   float temperature = particleSensor.readTemperature();
   calibratedTemperature = temperature - 5;
 
