@@ -13,7 +13,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Optional: Add a dark overlay */
+    background: rgba(14, 80, 121, 0.5); /* Optional: Add a dark overlay */
     z-index: -1;
 }
 
