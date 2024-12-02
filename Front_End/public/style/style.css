@@ -23,7 +23,7 @@ header .container {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    height: 50vh;
+    height: 100vh;
 }
 
 /* CSS for typing animation */
@@ -37,4 +37,31 @@ header .container {
     border-right: .15em solid white;
     white-space: nowrap;
     animation: typing 3.5s steps(40, end) step-end infinite;
+}
+
+/* CSS for fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 2s ease-in;
+}
+
+/* CSS for rounded image */
+.rounded-circle {
+    border-radius: 50%;
+}
+
+/* health-related background */
+.bg-alat {
+    background-color: #28d5ec; /* Light cyan color */
+}
+
+/* CSS for description text */
+.description {
+    font-size: 1.2rem; /* Adjust the font size as needed */
+    line-height: 1.6;
+    color: #333; /* Darker text color for better readability */
 }
