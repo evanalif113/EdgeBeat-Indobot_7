@@ -1,7 +1,7 @@
 const texts = [
     "Projek Akhir WEMOS B Indobot 7",
     "Selamat Datang di Edgebeat",
-    "Aplikasi Pemantauan Kesehatan"
+    "#IoTForHealth"
 ];
 
 let count = 0;

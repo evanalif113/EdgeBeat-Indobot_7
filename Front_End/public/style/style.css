@@ -1,15 +1,21 @@
+/* CSS untuk memusatkan teks */
+header .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* CSS untuk animasi mengetik */
 @keyframes typing {
     from { width: 0; }
     to { width: 100%; }
-}
-
-@keyframes blink-caret {
-    from, to { border-color: transparent; }
 }
 
 .typing-animation {
     overflow: hidden;
     border-right: .15em solid white;
     white-space: nowrap;
-    animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    animation: typing 3.5s steps(40, end) step-end infinite;
 }
