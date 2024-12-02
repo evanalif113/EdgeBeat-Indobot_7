@@ -1,13 +1,32 @@
-/* CSS untuk memusatkan teks */
+/* CSS for background image */
+.header-bg {
+    background: url('../img/healthcare.png') no-repeat center center;
+    background-size: cover;
+    position: relative;
+    z-index: 1;
+}
+
+.header-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Optional: Add a dark overlay */
+    z-index: -1;
+}
+
+/* CSS for centering text */
 header .container {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    height: 100%;
+    height: 50vh;
 }
 
-/* CSS untuk animasi mengetik */
+/* CSS for typing animation */
 @keyframes typing {
     from { width: 0; }
     to { width: 100%; }
