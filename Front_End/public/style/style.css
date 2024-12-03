@@ -18,12 +18,12 @@
 }
 
 /* CSS for centering text */
-header .container {
+header .index {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    height: 100vh;
+    height: 80vh;
 }
 
 /* CSS for typing animation */
