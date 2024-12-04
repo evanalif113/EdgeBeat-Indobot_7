@@ -76,7 +76,7 @@
 
     <!-- Main Content -->
     <div class="container mt-5">
-        <h2>Data from Firebase</h2>
+        <h2>Data User</h2>
         <table class="table table-bordered" id="data-table">
             <thead>
                 <tr>
@@ -90,18 +90,6 @@
                 <!-- Data will be inserted here -->
             </tbody>
         </table>
-    </div>
-
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="recording-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Status Rekaman</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                <!-- Pesan toast akan ditampilkan di sini -->
-            </div>
-        </div>
     </div>
 
     <!-- Modal Sukses -->
@@ -171,22 +159,25 @@
             // Function to fetch data from Firebase and display in table
             async function fetchData() {
             const dbRef = ref(database);
-            const snapshot = await get(child(dbRef, `/pendaftaran`));
-            if (snapshot.exists()) {
-                const data = snapshot.val();
+            //Data Register
+            const snapshotReg = await get(child(dbRef, `/pendaftaran`));
+            //Data Rekam
+            const snapshotRek = await get(child(dbRef, `/rekaman`));
+            if (snapshotReg.exists()) {
+                const dataReg = snapshotReg.val();
                 const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
                 tableBody.innerHTML = ''; // Clear existing data
-                for (const key in data) {
-                    if (data.hasOwnProperty(key)) {
+                for (const key in dataReg) {
+                    if (dataReg.hasOwnProperty(key)) {
                         const row = tableBody.insertRow();
                         const cell1 = row.insertCell(0);
                         const cell2 = row.insertCell(1);
                         const cell3 = row.insertCell(2);
                         const cell4 = row.insertCell(3);
-                        cell1.textContent = data[key].id;
-                        cell2.textContent = data[key].nama;
-                        cell3.textContent = data[key].umur;
-                        cell4.textContent = data[key].gender;
+                        cell1.textContent = dataReg[key].id;
+                        cell2.textContent = dataReg[key].nama;
+                        cell3.textContent = dataReg[key].umur;
+                        cell4.textContent = dataReg[key].gender;
                     }
                 }
             } else {
