@@ -47,7 +47,10 @@
                 <a class="nav-link active" href="./index.html">Beranda</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="./data.html">Data</a>
+                <a class="nav-link" href="./dataUser.html">Data User</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="./dataRekam.html">Data Rekaman User</a>
             </li>
             <li class="nav-item">
                 <a class="btn btn-primary" href="#register">Login</a>
@@ -62,17 +65,17 @@
 
     <!-- Main Content -->
     <div class="container mt-5">
-        <h2>Data User</h2>
+        <h2>Data Rekaman</h2>
         <table class="table table-bordered" id="data-table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Waktu</th>
                     <th>Nama</th>
                     <th>Umur</th>
                     <th>Gender</th>
                     <th>Denyut Nadi</th>
                     <th>Saturasi O2</th>
+                    <th>Suhu Tubuh</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,22 +159,26 @@
                 const dataReg = snapshotReg.val();
                 const dataRek = snapshotRek.val();
 
-                const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+                const tableBody = document
+                .getElementById('data-table')
+                .getElementsByTagName('tbody')[0];
                 tableBody.innerHTML = ''; // Clear existing data
                 for (const key in dataReg) {
                     if (dataReg.hasOwnProperty(key)) {
                         const row = tableBody.insertRow();
-                        const cell1 = row.insertCell(0);
-                        const cell2 = row.insertCell(1);
-                        const cell3 = row.insertCell(2);
-                        const cell4 = row.insertCell(3);
-                        cell1.textContent = dataReg[key].id;
-                        cell2.textContent = dataReg[key].nama;
-                        cell3.textContent = dataReg[key].umur;
-                        cell4.textContent = dataReg[key].gender;
+                        const id = row.insertCell(0);
+                        const nama = row.insertCell(1);
+                        const umur = row.insertCell(2);
+                        const gender = row.insertCell(3);
+
+                        id.textContent = dataReg[key].id;
+                        nama.textContent = dataReg[key].nama;
+                        umur.textContent = dataReg[key].umur;
+                        gender.textContent = dataReg[key].gender;  
                     }
                 }
-            } else {
+            } 
+            else {
                 console.log("No data available");
             }
         }

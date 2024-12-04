@@ -159,14 +159,14 @@
                 for (const key in dataReg) {
                     if (dataReg.hasOwnProperty(key)) {
                         const row = tableBody.insertRow();
-                        const cell1 = row.insertCell(0);
-                        const cell2 = row.insertCell(1);
-                        const cell3 = row.insertCell(2);
-                        const cell4 = row.insertCell(3);
-                        cell1.textContent = dataReg[key].id;
-                        cell2.textContent = dataReg[key].nama;
-                        cell3.textContent = dataReg[key].umur;
-                        cell4.textContent = dataReg[key].gender;
+                        const id = row.insertCell(0);
+                        const nama = row.insertCell(1);
+                        const umur = row.insertCell(2);
+                        const gender = row.insertCell(3);
+                        id.textContent = dataReg[key].id;
+                        nama.textContent = dataReg[key].nama;
+                        umur.textContent = dataReg[key].umur;
+                        gender.textContent = dataReg[key].gender;  
                     }
                 }
             } else {
