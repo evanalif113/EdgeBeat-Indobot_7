@@ -67,9 +67,12 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Waktu</th>
                     <th>Nama</th>
                     <th>Umur</th>
                     <th>Gender</th>
+                    <th>Denyut Nadi</th>
+                    <th>Saturasi O2</th>
                 </tr>
             </thead>
             <tbody>
@@ -149,8 +152,10 @@
             const snapshotReg = await get(child(dbRef, `/pendaftaran`));
             //Data Rekam
             const snapshotRek = await get(child(dbRef, `/rekaman`));
-            if (snapshotReg.exists()) {
+            if (snapshotReg.exists() && snapshotRek.exists()) {
                 const dataReg = snapshotReg.val();
+                const dataRek = snapshotRek.val();
+
                 const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
                 tableBody.innerHTML = ''; // Clear existing data
                 for (const key in dataReg) {
