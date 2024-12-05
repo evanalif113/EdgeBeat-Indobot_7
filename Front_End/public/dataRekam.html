@@ -130,8 +130,8 @@
     <!-- Firebase Configuration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, child, push, set , get, query, orderByKey, limitToLast} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
+        import { getDatabase, ref, child, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA-GgbbQkIOWRJ2nYgGkYTq8EaN4h1R2HQ",
@@ -143,26 +143,30 @@
             appId: "1:407937371870:web:4ed6c579d62b283a587c4f",
             measurementId: "G-Y4MZVWEJ2K"
         };
-
+    
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-
-            // Function to fetch data from Firebase and display in table
-            async function fetchData() {
+    
+        // Function to fetch data from Firebase and display in table
+        async function fetchData() {
             const dbRef = ref(database);
-            //Data Register
+    
+            // Fetch data from `/pendaftaran`
             const snapshotReg = await get(child(dbRef, `/pendaftaran`));
-            //Data Rekam
+            // Fetch data from `/rekaman`
             const snapshotRek = await get(child(dbRef, `/rekaman`));
+    
             if (snapshotReg.exists() && snapshotRek.exists()) {
                 const dataReg = snapshotReg.val();
                 const dataRek = snapshotRek.val();
-
+    
                 const tableBody = document
-                .getElementById('data-table')
-                .getElementsByTagName('tbody')[0];
+                    .getElementById('data-table')
+                    .getElementsByTagName('tbody')[0];
                 tableBody.innerHTML = ''; // Clear existing data
+    
+                // Iterate over `/pendaftaran`
                 for (const key in dataReg) {
                     if (dataReg.hasOwnProperty(key)) {
                         const row = tableBody.insertRow();
@@ -170,22 +174,45 @@
                         const nama = row.insertCell(1);
                         const umur = row.insertCell(2);
                         const gender = row.insertCell(3);
-
+                        const heartbeat = row.insertCell(4);
+                        const spo = row.insertCell(5);
+                        const suhuTubuh = row.insertCell(6);
+                        const timestamp = row.insertCell(7);
+    
+                        // Populate `/pendaftaran` data
                         id.textContent = dataReg[key].id;
                         nama.textContent = dataReg[key].nama;
                         umur.textContent = dataReg[key].umur;
-                        gender.textContent = dataReg[key].gender;  
+                        gender.textContent = dataReg[key].gender;
+    
+                        // Check matching ID in `/rekaman`
+                        const rekamanData = dataRek[key]; // Match by ID
+                        if (rekamanData) {
+                            const latestTimestamp = Object.keys(rekamanData).sort().pop(); // Get latest timestamp
+                            const latestData = rekamanData[latestTimestamp];
+    
+                            heartbeat.textContent = latestData.heartbeat;
+                            spo.textContent = latestData.spo;
+                            suhuTubuh.textContent = latestData.suhu_tubuh;
+                            timestamp.textContent = latestData.timestamp;
+                        } else {
+                            // If no data in `/rekaman`
+                            heartbeat.textContent = "-";
+                            spo.textContent = "-";
+                            suhuTubuh.textContent = "-";
+                            timestamp.textContent = "-";
+                        }
                     }
                 }
-            } 
-            else {
+            } else {
                 console.log("No data available");
             }
         }
-
+    
         // Fetch data on page load
         window.onload = fetchData;
     </script>
+    
 
     <!-- Footer -->
     <footer class="bg-light py-4">
