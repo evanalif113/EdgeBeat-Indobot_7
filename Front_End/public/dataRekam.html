@@ -66,6 +66,7 @@
     <!-- Main Content -->
     <div class="container mt-5">
         <h2>Data Rekaman</h2>
+        <button id="downloadBtn" class="btn btn-primary mb-3">Unduh Tabel</button>
         <table class="table table-bordered" id="data-table">
             <thead>
                 <tr>
@@ -229,7 +230,29 @@
         window.onload = fetchData;
     </script>
     
-    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            const table = document.getElementById('data-table');
+            const rows = table.querySelectorAll('tr');
+            let rowIndex = 10;
+
+            rows.forEach(function(row) {
+                const cols = row.querySelectorAll('th, td');
+                let colIndex = 10;
+                cols.forEach(function(col) {
+                    doc.text(col.innerText, colIndex, rowIndex);
+                    colIndex += 32;
+                });
+                rowIndex += 10;
+            });
+
+            doc.save('data_tabel.pdf');
+        });
+    </script>
 
     <!-- Footer -->
     <footer class="bg-light py-4">
