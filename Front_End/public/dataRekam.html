@@ -231,28 +231,34 @@
     </script>
     
     <!-- jsPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape');
-            const table = document.getElementById('data-table');
-            const rows = table.querySelectorAll('tr');
-            let rowIndex = 10;
+<!-- jsPDF and autoTable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+<script>
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const table = document.getElementById('data-table');
+        const rows = table.querySelectorAll('tr');
+        const data = [];
 
-            rows.forEach(function(row) {
-                const cols = row.querySelectorAll('th, td');
-                let colIndex = 10;
-                cols.forEach(function(col) {
-                    doc.text(col.innerText, colIndex, rowIndex);
-                    colIndex += 32;
-                });
-                rowIndex += 10;
+        rows.forEach(function(row) {
+            const cols = row.querySelectorAll('th, td');
+            const rowData = [];
+            cols.forEach(function(col) {
+                rowData.push(col.innerText);
             });
-
-            doc.save('data_tabel.pdf');
+            data.push(rowData);
         });
-    </script>
+
+        doc.autoTable({
+            head: [data[0]], // Use the first row as the header
+            body: data.slice(1) // Use the rest as the body
+        });
+
+        doc.save('data_tabel.pdf');
+    });
+</script>
 
     <!-- Footer -->
     <footer class="bg-light py-4">
