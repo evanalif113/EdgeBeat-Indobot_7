@@ -76,6 +76,7 @@
                     <th>Denyut Nadi</th>
                     <th>Saturasi O2</th>
                     <th>Suhu Tubuh</th>
+                    <th>Waktu dan Tanggal</th>
                 </tr>
             </thead>
             <tbody>
@@ -148,6 +149,21 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
     
+        // Function to format timestamp to human-readable
+        function formatTimestamp(unixTimestamp) {
+            const date = new Date(unixTimestamp * 1000); // Convert from seconds to milliseconds
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hourCycle: 'h23', // Use 24-hour format
+            };
+            return date.toLocaleString('en-GB', options).replace(',', '');
+        }
+    
         // Function to fetch data from Firebase and display in table
         async function fetchData() {
             const dbRef = ref(database);
@@ -194,7 +210,7 @@
                             heartbeat.textContent = latestData.heartbeat;
                             spo.textContent = latestData.spo;
                             suhuTubuh.textContent = latestData.suhu_tubuh;
-                            timestamp.textContent = latestData.timestamp;
+                            timestamp.textContent = formatTimestamp(latestData.timestamp); // Format timestamp
                         } else {
                             // If no data in `/rekaman`
                             heartbeat.textContent = "-";
@@ -212,6 +228,7 @@
         // Fetch data on page load
         window.onload = fetchData;
     </script>
+    
     
 
     <!-- Footer -->
