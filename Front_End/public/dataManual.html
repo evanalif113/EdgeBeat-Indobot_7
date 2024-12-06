@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edgebeat</title>
+    <!-- Favicon -->
+    <link rel="icon" href="./img/logo.png" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+<!-- Navbar -->
+<nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top">
+    <div class="container-fluid">
+        
+        <!--Logo NavBar-->
+        <a class="navbar-brand mx-auto d-flex align-items-center" href="./index.html">
+            <img src="./img/logo.png" alt="Edgebeat Logo" style="height: 40px" class="d-inline-block align-text-top">
+            <span class="ms-2">Edgebeat</span>
+        </a>
+
+         <!-- Toggler untuk tampilan mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="nav ms-auto me-4">
+                <li class="nav-item">
+                    <a class="nav-link active"  href="./index.html">Beranda</a>
+                </li>
+            </ul>
+        </div>
+
+        <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+    </div>
+</nav>
+
+<!-- Sidebar -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarLabel">Edgebeat</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link active" href="./index.html">Beranda</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="./data.html">Data</a>
+            </li>
+            <li class="nav-item">
+                <a class="btn btn-primary" href="#register">Login</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-5">
+    </header>
+
+    <!-- Form Section -->
+    <section id="form-section" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Pencatatan Data Manual</h2>
+            <form id="formPendaftaran">
+                <div class="mb-3">
+                    <label for="nama" class="form-label">Nama</label>
+                    <input type="text" class="form-control" id="nama" placeholder="Masukkan Nama Anda" required>
+                </div>
+                <div class="mb-3">
+                    <label for="umur" class="form-label">Umur</label>
+                    <input type="text" class="form-control" id="umur" placeholder="Masukkan Umur Anda" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Jenis Kelamin</label><br>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" id="genderMale" value="Laki-laki" required>
+                        <label class="form-check-label" for="genderMale">Laki-laki</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="Perempuan" required>
+                        <label class="form-check-label" for="genderFemale">Perempuan</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Kirim</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Modal Sukses -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Berhasil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Data berhasil dikirim!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Terjadi kesalahan saat mengirim data. Silakan coba lagi.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getDatabase, ref, child, push, set , get} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-GgbbQkIOWRJ2nYgGkYTq8EaN4h1R2HQ",
+            authDomain: "edgebeat-indobot7.firebaseapp.com",
+            databaseURL: "https://edgebeat-indobot7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "edgebeat-indobot7",
+            storageBucket: "edgebeat-indobot7.firebasestorage.app",
+            messagingSenderId: "407937371870",
+            appId: "1:407937371870:web:4ed6c579d62b283a587c4f",
+            measurementId: "G-Y4MZVWEJ2K"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.getElementById('formPendaftaran').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const nama = document.getElementById('nama').value;
+            const umur = document.getElementById('umur').value;
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+
+            try {
+            // Referensi ke database 'pendaftaran'
+            const pendaftaranRef = ref(database, 'pendaftaran');
+
+            // Ambil ID terakhir dari database
+            const snapshot = await get(pendaftaranRef);
+            let newID = 1; // Default ID jika tidak ada data
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const ids = Object.keys(data).map(id => parseInt(id));
+                newID = Math.max(...ids) + 1; // Tambahkan 1 ke ID terakhir
+            }
+
+            // Data baru yang akan disimpan
+            const newData = {
+                id: newID, // Menyimpan ID sebagai field di dokumen
+                nama,
+                umur,
+                gender
+            };
+
+            // refrensi ke database 'id'
+            const idRef = ref(database, 'id');
+            await set(idRef, newID);
+
+            // Simpan data dengan ID numerik
+            await set(ref(database, `pendaftaran/${newID}`), newData);
+
+
+            // Tunggu 15 detik sebelum beralih ke halaman lain
+            setTimeout(() => {
+                window.location.href = './perekaman.html'; // Ganti 'anotherPage.html' dengan halaman tujuan Anda
+            }, 5000);
+
+            // Tampilkan modal sukses
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+            document.getElementById('formPendaftaran').reset();
+            } catch (error) {
+            console.error('Error:', error);
+            // Tampilkan modal error
+            new bootstrap.Modal(document.getElementById('errorModal')).show();
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Edgebeat. Hak Cipta Dilindungi Undang-undang.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
