@@ -125,6 +125,7 @@
             const heartbeat = document.getElementById('heartbeat').value;
             const spo = document.getElementById('spo').value;
             const suhu_tubuh = document.getElementById('suhu_tubuh').value;
+            const timestamp = Math.floor(Date.now() / 1000); // Timestamp saat ini dalam detik
 
             try {
                 // Referensi ke database 'pendaftaran'
@@ -152,12 +153,12 @@
                     heartbeat,
                     spo,
                     suhu_tubuh,
-                    timestamp: Math.floor(Date.now() / 1000) // Timestamp saat ini dalam detik
+                    timestamp
                 };
 
-                // Simpan data ke database
+                // Simpan data ke database dengan timestamp sebagai parent
                 await set(ref(database, `pendaftaran/${newID}`), newDataPendaftaran);
-                await set(ref(database, `rekaman/${newID}`), newDataRekaman);
+                await set(ref(database, `rekaman/${newID}/${timestamp}`), newDataRekaman);
 
                 // Perbarui ID
                 const idRef = ref(database, 'id');
