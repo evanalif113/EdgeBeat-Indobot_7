@@ -11,60 +11,48 @@
 </head>
 <body>
     <!-- Navbar -->
-<!-- Navbar -->
-<nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top">
-    <div class="container-fluid">
-        
-        <!--Logo NavBar-->
-        <a class="navbar-brand mx-auto d-flex align-items-center" href="./index.html">
-            <img src="./img/logo.png" alt="Edgebeat Logo" style="height: 40px" class="d-inline-block align-text-top">
-            <span class="ms-2">Edgebeat</span>
-        </a>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-auto d-flex align-items-center" href="./index.html">
+                <img src="./img/logo.png" alt="Edgebeat Logo" style="height: 40px" class="d-inline-block align-text-top">
+                <span class="ms-2">Edgebeat</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="nav ms-auto me-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="./index.html">Beranda</a>
+                    </li>
+                </ul>
+            </div>
+            <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
 
-         <!-- Toggler untuk tampilan mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="nav ms-auto me-4">
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="sidebarLabel">Edgebeat</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active"  href="./index.html">Beranda</a>
+                    <a class="nav-link active" href="./index.html">Beranda</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./data.html">Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary" href="#register">Login</a>
                 </li>
             </ul>
         </div>
-
-        <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
     </div>
-</nav>
-
-<!-- Sidebar -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="sidebarLabel">Edgebeat</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link active" href="./index.html">Beranda</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="./data.html">Data</a>
-            </li>
-            <li class="nav-item">
-                <a class="btn btn-primary" href="#register">Login</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-    <!-- Header -->
-    <header class="bg-primary text-white text-center py-5">
-    </header>
 
     <!-- Form Section -->
     <section id="form-section" class="py-5">
@@ -90,45 +78,27 @@
                         <label class="form-check-label" for="genderFemale">Perempuan</label>
                     </div>
                 </div>
+                <div class="mb-3">
+                    <label for="heartbeat" class="form-label">Heartbeat</label>
+                    <input type="text" class="form-control" id="heartbeat" placeholder="Masukkan Heartbeat" required>
+                </div>
+                <div class="mb-3">
+                    <label for="spo" class="form-label">SpO2</label>
+                    <input type="text" class="form-control" id="spo" placeholder="Masukkan SpO2" required>
+                </div>
+                <div class="mb-3">
+                    <label for="suhu_tubuh" class="form-label">Suhu Tubuh</label>
+                    <input type="text" class="form-control" id="suhu_tubuh" placeholder="Masukkan Suhu Tubuh" required>
+                </div>
                 <button type="submit" class="btn btn-primary">Kirim</button>
             </form>
         </div>
     </section>
 
-    <!-- Modal Sukses -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Berhasil</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Data berhasil dikirim!
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Error -->
-    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Error</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Terjadi kesalahan saat mengirim data. Silakan coba lagi.
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Firebase Configuration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, child, push, set , get} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        import { getDatabase, ref, child, push, set , get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -152,51 +122,87 @@
             const nama = document.getElementById('nama').value;
             const umur = document.getElementById('umur').value;
             const gender = document.querySelector('input[name="gender"]:checked').value;
+            const heartbeat = document.getElementById('heartbeat').value;
+            const spo = document.getElementById('spo').value;
+            const suhu_tubuh = document.getElementById('suhu_tubuh').value;
 
             try {
-            // Referensi ke database 'pendaftaran'
-            const pendaftaranRef = ref(database, 'pendaftaran');
+                // Referensi ke database 'pendaftaran'
+                const pendaftaranRef = ref(database, 'pendaftaran');
 
-            // Ambil ID terakhir dari database
-            const snapshot = await get(pendaftaranRef);
-            let newID = 1; // Default ID jika tidak ada data
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const ids = Object.keys(data).map(id => parseInt(id));
-                newID = Math.max(...ids) + 1; // Tambahkan 1 ke ID terakhir
-            }
+                // Ambil ID terakhir dari database
+                const snapshot = await get(pendaftaranRef);
+                let newID = 1; // Default ID jika tidak ada data
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const ids = Object.keys(data).map(id => parseInt(id));
+                    newID = Math.max(...ids) + 1; // Tambahkan 1 ke ID terakhir
+                }
 
-            // Data baru yang akan disimpan
-            const newData = {
-                id: newID, // Menyimpan ID sebagai field di dokumen
-                nama,
-                umur,
-                gender
-            };
+                // Data untuk pendaftaran
+                const newDataPendaftaran = {
+                    id: newID,
+                    nama,
+                    umur,
+                    gender
+                };
 
-            // refrensi ke database 'id'
-            const idRef = ref(database, 'id');
-            await set(idRef, newID);
+                // Data untuk rekaman
+                const newDataRekaman = {
+                    heartbeat,
+                    spo,
+                    suhu_tubuh,
+                    timestamp: Math.floor(Date.now() / 1000) // Timestamp saat ini dalam detik
+                };
 
-            // Simpan data dengan ID numerik
-            await set(ref(database, `pendaftaran/${newID}`), newData);
+                // Simpan data ke database
+                await set(ref(database, `pendaftaran/${newID}`), newDataPendaftaran);
+                await set(ref(database, `rekaman/${newID}`), newDataRekaman);
 
+                // Perbarui ID
+                const idRef = ref(database, 'id');
+                await set(idRef, newID);
 
-            // Tunggu 15 detik sebelum beralih ke halaman lain
-            setTimeout(() => {
-                window.location.href = './perekaman.html'; // Ganti 'anotherPage.html' dengan halaman tujuan Anda
-            }, 5000);
-
-            // Tampilkan modal sukses
-            new bootstrap.Modal(document.getElementById('successModal')).show();
-            document.getElementById('formPendaftaran').reset();
+                // Tampilkan modal sukses
+                new bootstrap.Modal(document.getElementById('successModal')).show();
+                document.getElementById('formPendaftaran').reset();
             } catch (error) {
-            console.error('Error:', error);
-            // Tampilkan modal error
-            new bootstrap.Modal(document.getElementById('errorModal')).show();
+                console.error('Error:', error);
+                // Tampilkan modal error
+                new bootstrap.Modal(document.getElementById('errorModal')).show();
             }
         });
     </script>
+
+    <!-- Modal Sukses -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Berhasil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Data berhasil dikirim!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Terjadi kesalahan saat mengirim data. Silakan coba lagi.
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-light py-4">
